@@ -1,0 +1,43 @@
+{
+    "name": "@trojs/tux",
+    "description": "Fun and simple 2D game engine for the web.",
+    "version": "0.1.0",
+    "author": {
+        "name": "Pieter Wigboldus",
+        "url": "https://trojs.org/"
+    },
+    "license": "MIT",
+    "scripts": {
+        "lint": "eslint",
+        "lint:report": "eslint src/*.js -f json -o report.json",
+        "lint:fix": "eslint --fix",
+        "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=./coverage/lcov.info",
+        "vulnerabilities": "npm audit --production",
+        "serve": "serve -p 3001 src"
+    },
+    "type": "module",
+    "main": "src/index.js",
+    "source": "src/index.js",
+    "module": "src/index.js",
+    "devDependencies": {
+        "@trojs/lint": "^0.2.9",
+        "eslint": "^9.15.0",
+        "globals": "^16.0.0",
+        "serve": "^14.2.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/trojs/tux"
+    },
+    "engines": {
+        "node": ">= 24"
+    },
+    "keywords": [
+        "tux",
+        "game"
+    ],
+    "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/w3nl"
+    }
+}

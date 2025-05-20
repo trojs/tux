@@ -1,1 +1,1 @@
-# tux
+# Tux game
