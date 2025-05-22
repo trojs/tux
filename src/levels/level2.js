@@ -16,13 +16,11 @@ const step1 = new Obstacle(2 * tileWidth, 600 - groundHeight - tileWidth, tileWi
 
 // A gap in the ground (classic jump)
 const leftGround = new Obstacle(0, 600 - groundHeight, 3 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
-const rightGround = new Obstacle(9 * tileWidth, 600 - groundHeight, 11 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
-const right2Ground = new Obstacle(25 * tileWidth, 600 - groundHeight, 11 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
+const right2Ground = new Obstacle(23 * tileWidth, 500 - groundHeight, 11 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
 const right3Ground = new Obstacle(40 * tileWidth, 600 - groundHeight, 10 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
 
 const obstacles = [
   leftGround,
-  rightGround,
   right2Ground,
   right3Ground,
   step1,

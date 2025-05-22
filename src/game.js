@@ -1,5 +1,5 @@
 import { tux } from './objects/tux.js'
-import { getLevel, levels } from './levels/levels.js'
+import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
 import { playMusic } from './music.js'
@@ -97,6 +97,30 @@ function draw () {
       tux.width, tux.height
     )
   }
+
+  // Draw level progress bar
+  const barWidth = canvas.width * 0.6
+  const barHeight = 16
+  const barX = (canvas.width - barWidth) / 2
+  const barY = 24
+
+  const progress = Math.max(0, Math.min(1, tux.x / (levelWidth - tux.width)))
+  ctx.save()
+  ctx.fillStyle = '#222'
+  ctx.fillRect(barX, barY, barWidth, barHeight)
+  ctx.fillStyle = '#4caf50'
+  ctx.fillRect(barX, barY, barWidth * progress, barHeight)
+  ctx.strokeStyle = '#fff'
+  ctx.lineWidth = 2
+  ctx.strokeRect(barX, barY, barWidth, barHeight)
+  ctx.font = '14px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.fillText(
+    `Level Progress: ${(progress * 100).toFixed(0)}%`,
+    canvas.width / 2,
+    barY + barHeight - 3
+  )
   ctx.restore()
 
   if (tux.gameOver) {
@@ -114,22 +138,6 @@ function draw () {
 
       // Draw level selection
       ctx.font = '24px sans-serif'
-      ctx.fillText('Choose a level:', canvas.width / 2, canvas.height / 2 + 20)
-
-      // List levels as buttons
-      const allLevels = levels.map((_level, i) => `${i + 1}. ${_level.name}`)
-      const startY = canvas.height / 2 + 60
-      allLevels.forEach((label, i) => {
-        ctx.fillStyle = 'white'
-        ctx.fillRect(canvas.width / 2 - 80, startY + i * 40 - 24, 160, 36)
-        ctx.fillStyle = 'black'
-        ctx.fillText(label, canvas.width / 2, startY + i * 40)
-      })
-
-      // Optionally, show instructions
-      ctx.font = '16px sans-serif'
-      ctx.fillStyle = 'white'
-      ctx.fillText('Press 1 or 2 to select a level', canvas.width / 2, startY + levels.length * 40)
     }
   }
 }
@@ -183,8 +191,7 @@ canvas.addEventListener('touchstart', (e) => {
 })
 document.addEventListener('keydown', (e) => {
   if (tux.gameOver) {
-    const newLevel = parseInt(e.key, 10) - 1
-    loadLevel(newLevel)
+    loadLevel(level)
   }
 })
 
