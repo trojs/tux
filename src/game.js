@@ -98,11 +98,19 @@ function draw () {
     )
   }
 
+  // Show current level at the top center
+  ctx.font = 'bold 20px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  // Get level name if available
+  const levelData = getLevel(level)
+  ctx.fillText(`Level ${level + 1}: ${levelData.name}`, canvas.width / 2, 32)
+
   // Draw level progress bar
   const barWidth = canvas.width * 0.6
   const barHeight = 16
   const barX = (canvas.width - barWidth) / 2
-  const barY = 24
+  const barY = 48
 
   const progress = Math.max(0, Math.min(1, tux.x / (levelWidth - tux.width)))
   ctx.save()

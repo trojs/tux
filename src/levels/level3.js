@@ -47,4 +47,4 @@ music.loop = true
 
 const backgroundColor = '#5c8cae'
 
-export default { obstacles, backgroundImg, levelWidth, music, backgroundColor, name: 'Level 3' }
+export default { obstacles, backgroundImg, levelWidth, music, backgroundColor, name: 'Final' }
