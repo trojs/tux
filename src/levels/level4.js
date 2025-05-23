@@ -1,7 +1,7 @@
 import { SnowObstacle } from '../objects/obstacle/snow.js'
 
 const tileSize = 32
-const levelWidth = 150 * tileSize
+const levelWidth = 155 * tileSize
 const levelHeight = 20 * tileSize
 
 const obstacles = [
@@ -40,7 +40,7 @@ const obstacles = [
   new SnowObstacle(135, 9, 1, 1),
   new SnowObstacle(136, 9, 1, 1),
   new SnowObstacle(139, 9, 4, 1),
-  new SnowObstacle(146, 9, 25, 1)
+  new SnowObstacle(146, 9, 30, 1)
 ]
 
 const backgroundImg = new Image()
