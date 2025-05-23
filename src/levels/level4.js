@@ -58,5 +58,5 @@ export default {
   levelHeight,
   music,
   backgroundColor,
-  name: 'Mima'
+  name: 'Lila'
 }
