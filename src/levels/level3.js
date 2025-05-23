@@ -18,7 +18,7 @@ const obstacles = [
   new SnowObstacle(0, 18, 6, 1, tileSize),
   new SnowObstacle(10, 18, 10, 1, tileSize),
   new SnowObstacle(35, 18, 10, 1, tileSize),
-  new SnowObstacle(50, 17, 10, 1, tileSize)
+  new SnowObstacle(50, 17, 25, 1, tileSize)
 ]
 
 const backgroundImg = new Image()

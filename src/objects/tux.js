@@ -15,7 +15,7 @@
  * @property {boolean} gameOver - Whether the game is over.
  * @returns {Tux} - The Tux object.
  */
-export const tux = {
+const tux = {
   x: 400,
   y: 300,
   width: 32,
@@ -29,4 +29,14 @@ export const tux = {
   animRow: 1,
   facing: 1,
   gameOver: false
+}
+
+const tuxImg = typeof Image !== 'undefined'
+  ? new Image()
+  : {}
+tuxImg.src = 'sprites/tux.png'
+
+export {
+  tux,
+  tuxImg
 }

@@ -8,7 +8,7 @@ const obstacles = [
   new SnowObstacle(0, 18, 7, 1, tileSize),
   new SnowObstacle(9, 18, 11, 1, tileSize),
   new SnowObstacle(25, 18, 11, 1, tileSize),
-  new SnowObstacle(40, 18, 10, 1, tileSize),
+  new SnowObstacle(40, 18, 25, 1, tileSize),
 
   new SnowObstacle(2, 17, 1, 1, tileSize),
   new SnowObstacle(4, 15, 3, 1, tileSize),

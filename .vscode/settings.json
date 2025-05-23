@@ -1,5 +1,7 @@
 {
-    "eslint.codeActionsOnSave.rules": null,
+    "eslint.codeActionsOnSave.rules": [
+        "*"
+    ],
     "editor.formatOnSave": true,
     "coverage-gutters.coverageFileNames": [
         "lcov.info",
@@ -26,21 +28,29 @@
     "npm.enableTouchbar": true,
     "lcov.path": "coverage/lcov.info",
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll": "explicit"
     },
     "[javascript]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[json]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[scss]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "vscode.css-language-features"
     },
     "eslint.alwaysShowStatus": true,
     "eslint.validate": [
         "javascript",
-        "vue"
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
     ],
     "eslint.format.enable": true,
-    "eslint.options": {
-        "resolvePluginsRelativeTo": "."
-    },
+    "eslint.options": {},
     "eslint.workingDirectories": [
         {
             "mode": "auto"
@@ -57,7 +67,6 @@
     "files.watcherExclude": {
         ".npmrc": true
     },
-    "githubPullRequests.ignoredPullRequestBranches": [
-        "main"
-    ]
+    "javascript.format.enable": false,
+    "terminal.integrated.scrollback": 5000,
 }

@@ -1,31 +1,32 @@
-import { tux } from './objects/tux.js'
+import { tux, tuxImg } from './objects/tux.js'
 import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
 import { playMusic } from './music.js'
+import { canvas, ctx } from './gui.js'
+import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
 let level = 0
 let obstacles, levelWidth, levelHeight, music, backgroundColor
 let allLevelsCompleted = false
 let scale = 1
-
-const canvas = document.createElement('canvas')
-const ctx = canvas.getContext('2d')
-canvas.width = 800
-canvas.height = 600
-canvas.style.backgroundColor = backgroundColor
-canvas.style.border = '1px solid black'
-document.body.appendChild(canvas)
+let cameraX = 0
 
 const completeMusic = new Audio('./music/credits.ogg')
+const frameWidth = 32
+const frameHeight = 32
+
+/** @type {{ [key: string]: boolean }} */
+const keys = {}
 
 /**
- *
- * @param levelData
+ * @param {object} levelData
+ * @returns {void}
  */
 function updateScale (levelData) {
   scale = Math.min(1, window.innerHeight / levelData.levelHeight)
 }
+
 /**
  *
  */
@@ -38,26 +39,6 @@ function resizeCanvas () {
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.scale((1 / scale) * dpr, (1 / scale) * dpr)
 }
-
-resizeCanvas()
-window.addEventListener('resize', resizeCanvas)
-
-const tuxImg = new Image()
-tuxImg.src = 'sprites/tux.png'
-
-const frameWidth = 32
-const frameHeight = 32
-
-let cameraX = 0
-
-/** @type {{ [key: string]: boolean }} */
-const keys = {}
-document.addEventListener('keydown', (e) => {
-  keys[e.key] = true
-})
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false
-})
 
 /**
  * @param {number} newLevel
@@ -92,8 +73,6 @@ function loadLevel (newLevel) {
   updateScale(levelData)
   return newLevel
 }
-
-loadLevel(level)
 
 /**
  *
@@ -135,49 +114,11 @@ function draw () {
   const levelData = getLevel(level)
   ctx.fillText(`Level ${level + 1}: ${levelData.name}`, canvas.width / 2, 32)
 
-  // Draw level progress bar
-  const barWidth = canvas.width * 0.6
-  const barHeight = 16
-  const barX = (canvas.width - barWidth) / 2
-  const barY = 48
-
   const progress = Math.max(0, Math.min(1, tux.x / (levelWidth - tux.width)))
-  ctx.save()
-  ctx.fillStyle = '#222'
-  ctx.fillRect(barX, barY, barWidth, barHeight)
-  ctx.fillStyle = '#4caf50'
-  ctx.fillRect(barX, barY, barWidth * progress, barHeight)
-  ctx.strokeStyle = '#fff'
-  ctx.lineWidth = 2
-  ctx.strokeRect(barX, barY, barWidth, barHeight)
-  ctx.font = '14px sans-serif'
-  ctx.fillStyle = '#fff'
-  ctx.textAlign = 'center'
-  ctx.fillText(
-    `Level Progress: ${(progress * 100).toFixed(0)}%`,
-    canvas.width / 2,
-    barY + barHeight - 3
-  )
-  ctx.restore()
+  drawProgressBar(ctx, progress, canvas, scale)
 
   if (tux.gameOver) {
-    ctx.fillStyle = 'rgba(0,0,0,0.7)'
-    ctx.fillRect(0, canvas.height / 2 - 100, canvas.width, 300)
-    ctx.fillStyle = 'white'
-    ctx.font = 'bold 48px sans-serif'
-    ctx.textAlign = 'center'
-    if (allLevelsCompleted) {
-      ctx.fillText('Congratulations!', canvas.width / 2, canvas.height / 2 - 20)
-      ctx.font = '32px sans-serif'
-      ctx.fillText('You completed all levels!', canvas.width / 2, canvas.height / 2 + 30)
-      music.pause()
-      completeMusic.play()
-    } else {
-      ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20)
-
-      // Draw level selection
-      ctx.font = '24px sans-serif'
-    }
+    showGameOver(ctx, canvas, allLevelsCompleted, music, completeMusic)
   }
 }
 
@@ -215,6 +156,15 @@ function update () {
   draw()
   requestAnimationFrame(update)
 }
+
+document.addEventListener('keydown', (e) => {
+  keys[e.key] = true
+})
+
+document.addEventListener('keyup', (e) => {
+  keys[e.key] = false
+})
+
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault()
   if (tux.gameOver) {
@@ -226,10 +176,16 @@ canvas.addEventListener('touchstart', (e) => {
     keys[' '] = false
   }, 100)
 })
+
 document.addEventListener('keydown', (e) => {
   if (tux.gameOver) {
     loadLevel(level)
   }
 })
 
-tuxImg.onload = () => update()
+window.addEventListener('resize', resizeCanvas)
+tuxImg.onload = () => {
+  loadLevel(level)
+  update()
+  resizeCanvas()
+}
