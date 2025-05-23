@@ -9,12 +9,12 @@ import { playMusic } from './music.js'
 import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
-let level = 0
+let level = Number(localStorage.getItem('tux_level')) || 0
+let score = Number(localStorage.getItem('tux_score')) || 0
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 let allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
-let score = 0
 
 const completeMusic = new Audio('./music/credits.ogg')
 const frameWidth = 32
@@ -202,6 +202,7 @@ function update () {
     if (getLevel(level + 1)) {
       score += coins.filter((c) => c.collected).length
       level++
+      saveProgress()
       loadLevel(level)
     } else {
       tux.gameOver = true
@@ -211,6 +212,14 @@ function update () {
   updateCamera()
   draw()
   requestAnimationFrame(update)
+}
+
+/**
+ *
+ */
+function saveProgress () {
+  localStorage.setItem('tux_level', level)
+  localStorage.setItem('tux_score', score)
 }
 
 document.addEventListener('keydown', (e) => {
