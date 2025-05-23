@@ -1,32 +1,19 @@
-import { Obstacle } from '../objects/obstacle/obstacle.js'
-export const tileSprite = new Image()
-tileSprite.src = '../sprites/tilesets/snowbg3.png'
+import { SnowObstacle } from '../objects/obstacle/snow.js'
 
-const groundHeight = 32
-const tileWidth = 32
-const levelWidth = 50 * tileWidth
-
-// Some floating platforms
-const platform1 = new Obstacle(4 * tileWidth, 600 - groundHeight - 3 * tileWidth, 3 * tileWidth, groundHeight, '#bca16a', tileSprite, 0, 0)
-const platform2 = new Obstacle(10 * tileWidth, 600 - groundHeight - 5 * tileWidth, 2 * tileWidth, groundHeight, '#bca16a', tileSprite, 0, 0)
-const platform3 = new Obstacle(15 * tileWidth, 600 - groundHeight - 2 * tileWidth, 3 * tileWidth, groundHeight, '#bca16a', tileSprite, 0, 0)
-
-// A small "step" near the start
-const step1 = new Obstacle(2 * tileWidth, 600 - groundHeight - tileWidth, tileWidth, groundHeight, '#bca16a', tileSprite, 0, 0)
-
-// A gap in the ground (classic jump)
-const leftGround = new Obstacle(0, 600 - groundHeight, 3 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
-const right2Ground = new Obstacle(23 * tileWidth, 500 - groundHeight, 11 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
-const right3Ground = new Obstacle(40 * tileWidth, 600 - groundHeight, 10 * tileWidth, groundHeight, '#7c5c3b', tileSprite, 0, 0)
+const tileSize = 32
+const levelWidth = 50 * tileSize
+const levelHeight = 18 * tileSize
 
 const obstacles = [
-  leftGround,
-  right2Ground,
-  right3Ground,
-  step1,
-  platform1,
-  platform2,
-  platform3
+  new SnowObstacle(4, 15, 3, 1, tileSize),
+  new SnowObstacle(10, 13, 2, 1, tileSize),
+  new SnowObstacle(15, 16, 3, 1, tileSize),
+
+  new SnowObstacle(2, 17, 1, 1, tileSize),
+
+  new SnowObstacle(0, 18, 3, 1, tileSize),
+  new SnowObstacle(23, 15, 11, 1, tileSize),
+  new SnowObstacle(40, 18, 10, 1, tileSize)
 ]
 
 const backgroundImg = new Image()
@@ -37,4 +24,12 @@ music.loop = true
 
 const backgroundColor = '#7c5c3b'
 
-export default { obstacles, backgroundImg, levelWidth, music, backgroundColor, name: 'Go' }
+export default {
+  obstacles,
+  backgroundImg,
+  levelWidth,
+  levelHeight,
+  music,
+  backgroundColor,
+  name: 'Go go'
+}

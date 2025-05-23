@@ -1,71 +1,78 @@
-import { tux } from './objects/tux.js'
-
 const walkFrameCount = 8
 const walkRow = 1
 const idleRow = 0
 const animSpeed = 5
 
+const gameOverSound = typeof Audio !== 'undefined'
+  ? new Audio('./sounds/icecrash.ogg')
+  : { play () {} }
+
 /**
- * @param {{ [key: string]: boolean }} keys
+ * @typedef {import('./objects/tux.js').Tux} Tux
+ * @param {Tux} tux
  * @param {number} levelWidth
- * @returns {void}
+ * @returns {Tux}
  */
-export function handleInput (keys, levelWidth) {
-  if (tux.gameOver) return
-  if (tux.x < 0) tux.x = 0
-  if (tux.x + tux.width > levelWidth) tux.x = levelWidth - tux.width
+export function handleInput (tux, levelWidth) {
+  const newTux = { ...tux }
+  if (newTux.gameOver) return newTux
+  if (newTux.x < 0) newTux.x = 0
+  if (newTux.x + newTux.width > levelWidth) newTux.x = levelWidth - newTux.width
+  return newTux
 }
 
 /**
- * @param {HTMLCanvasElement} canvas
- * @returns {void}
+ * @param {Tux} tux
+ * @param {number} canvasHeight
+ * @returns {Tux}
  */
-export function applyGravity (canvas) {
-  if (tux.gameOver) return
+export function applyGravity (tux, canvasHeight) {
+  const newTux = { ...tux }
+  if (newTux.gameOver) return newTux
 
-  tux.vy += tux.gravity
-  tux.y += tux.vy
+  newTux.vy += newTux.gravity
+  newTux.y += newTux.vy
+  newTux.onGround = false
 
-  tux.onGround = false
-
-  if (tux.y > canvas.height) {
-    tux.gameOver = true
-
-    const music = new Audio('./sounds/icecrash.ogg')
-    music.play()
+  if (newTux.y + newTux.height > canvasHeight * 2) {
+    newTux.gameOver = true
+    gameOverSound.play()
   }
+  return newTux
 }
 
 /**
+ * @param {Tux} tux
  * @param {{ [key: string]: boolean }} keys
- * @returns {void}
+ * @returns {Tux}
  */
-export function jump (keys) {
-  if ((keys['ArrowUp'] || keys[' '] || keys['Space']) && tux.onGround) {
-    tux.vy = -10
-    tux.onGround = false
+export function jump (tux, keys) {
+  const newTux = { ...tux }
+  if ((keys['ArrowUp'] || keys[' '] || keys['Space']) && newTux.onGround) {
+    newTux.vy = -10
+    newTux.onGround = false
   }
+  return newTux
 }
 /**
- * @param {{ [key: string]: boolean }} keys
- * @returns {void}
+ * @param {Tux} tux
+ * @returns {Tux}
  */
-export function updateTuxAnimation (keys) {
-  // Determine direction
-  tux.facing = 1
+export function updateTuxAnimation (tux) {
+  const newTux = { ...tux }
+  newTux.facing = 1
 
-  // Walking animation
-  if (tux.onGround) {
-    tux.animRow = walkRow
-    tux.animTimer++
-    if (tux.animTimer >= animSpeed) {
-      tux.animFrame = (tux.animFrame + 1) % walkFrameCount
-      tux.animTimer = 0
+  if (newTux.onGround) {
+    newTux.animRow = walkRow
+    newTux.animTimer = (newTux.animTimer || 0) + 1
+    if (newTux.animTimer >= animSpeed) {
+      newTux.animFrame = ((newTux.animFrame || 0) + 1) % walkFrameCount
+      newTux.animTimer = 0
     }
   } else {
-    // Idle
-    tux.animRow = idleRow
-    tux.animFrame = 0
-    tux.animTimer = 0
+    newTux.animRow = idleRow
+    newTux.animFrame = 0
+    newTux.animTimer = 0
   }
+  return newTux
 }

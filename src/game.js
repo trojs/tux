@@ -5,8 +5,9 @@ import { handleObstacleCollisions } from './collision.js'
 import { playMusic } from './music.js'
 
 let level = 0
-let obstacles, levelWidth, music, backgroundColor
+let obstacles, levelWidth, levelHeight, music, backgroundColor
 let allLevelsCompleted = false
+let scale = 1
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
@@ -16,13 +17,28 @@ canvas.style.backgroundColor = backgroundColor
 canvas.style.border = '1px solid black'
 document.body.appendChild(canvas)
 
+const completeMusic = new Audio('./music/credits.ogg')
+
+/**
+ *
+ * @param levelData
+ */
+function updateScale (levelData) {
+  scale = Math.min(1, window.innerHeight / levelData.levelHeight)
+}
 /**
  *
  */
 function resizeCanvas () {
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
+  const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
+  canvas.width = (window.innerWidth / scale) * dpr
+  canvas.height = (window.innerHeight / scale) * dpr
+  canvas.style.width = `${window.innerWidth}px`
+  canvas.style.height = `${window.innerHeight}px`
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.scale((1 / scale) * dpr, (1 / scale) * dpr)
 }
+
 resizeCanvas()
 window.addEventListener('resize', resizeCanvas)
 
@@ -45,13 +61,22 @@ document.addEventListener('keyup', (e) => {
 
 /**
  * @param {number} newLevel
- * @returns {boolean}
+ * @returns {number}
  */
 function loadLevel (newLevel) {
+  completeMusic.pause()
+  if (allLevelsCompleted) {
+    level = 0
+    tux.gameOver = false
+    allLevelsCompleted = false
+    return loadLevel(0)
+  }
   const levelData = getLevel(newLevel)
-  if (!levelData) return false
+  if (!levelData) return 0
   obstacles = levelData.obstacles
-  levelWidth = levelData.levelWidth
+  levelWidth = levelData.levelWidth || canvas.width
+  levelHeight = Math.max(levelData.levelHeight, canvas.height)
+
   if (music) {
     music.pause()
   }
@@ -64,7 +89,8 @@ function loadLevel (newLevel) {
   tux.gameOver = false
   playMusic(music)
   music.play()
-  return true
+  updateScale(levelData)
+  return newLevel
 }
 
 loadLevel(level)
@@ -73,7 +99,9 @@ loadLevel(level)
  *
  */
 function draw () {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.setTransform(scale, 0, 0, scale, 0, 0)
+  ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale)
+
   obstacles.forEach((ob) => ob.draw(ctx, cameraX))
   ctx.save()
   // Flip for left-facing
@@ -96,6 +124,7 @@ function draw () {
       tux.x - cameraX, tux.y,
       tux.width, tux.height
     )
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
 
   // Show current level at the top center
@@ -141,6 +170,8 @@ function draw () {
       ctx.fillText('Congratulations!', canvas.width / 2, canvas.height / 2 - 20)
       ctx.font = '32px sans-serif'
       ctx.fillText('You completed all levels!', canvas.width / 2, canvas.height / 2 + 30)
+      music.pause()
+      completeMusic.play()
     } else {
       ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20)
 
@@ -154,11 +185,9 @@ function draw () {
  *
  */
 function updateCamera () {
-  // Center camera on Tux
   cameraX = tux.x + tux.width / 2 - canvas.width / 2
-  // Clamp cameraX to 0 or level width (if you have a level width)
+
   if (cameraX < 0) cameraX = 0
-  // If you have a levelWidth variable, uncomment the next line:
   if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width
 }
 /**
@@ -168,11 +197,11 @@ function update () {
   if (!tux.gameOver) {
     tux.x += tux.speed
   }
-  handleInput(keys, levelWidth)
-  jump(keys)
-  applyGravity(canvas)
-  handleObstacleCollisions(obstacles)
-  updateTuxAnimation(keys)
+  Object.assign(tux, handleInput(tux, levelWidth))
+  Object.assign(tux, jump(tux, keys))
+  Object.assign(tux, applyGravity(tux, levelHeight))
+  Object.assign(tux, handleObstacleCollisions(tux, obstacles))
+  Object.assign(tux, updateTuxAnimation(tux))
   if (tux.x + tux.width >= levelWidth) {
     if (getLevel(level + 1)) {
       level++

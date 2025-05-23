@@ -1,14 +1,22 @@
 /* eslint-disable no-param-reassign */
+/**
+ * @typedef {object} ObstacleObject
+ * @property {number} x
+ * @property {number} y
+ * @property {number} width
+ * @property {number} height
+ * @property {number=} tileSize
+ */
 export class Obstacle {
-  constructor (x, y, width, height, color = 'brown', sprite = null, tileX = 0, tileY = 0, tileSize = 32) {
-    this.x = x
-    this.y = y
-    this.width = width
-    this.height = height
-    this.color = color
-    this.sprite = sprite
-    this.tileX = tileX // tile column in the sprite sheet
-    this.tileY = tileY // tile row in the sprite sheet
+  constructor (x, y, width, height, tileSize = 32) {
+    this.x = x * tileSize
+    this.y = y * tileSize
+    this.width = width * tileSize
+    this.height = height * tileSize
+    this.color = 'brown'
+    this.sprite = null
+    this.tileX = 0
+    this.tileY = 0
     this.tileSize = tileSize
   }
 

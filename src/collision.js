@@ -1,43 +1,43 @@
-import { tux } from './objects/tux.js'
-
 /**
- * @param {import('./objects/obstacle/obstacle.js').Obstacle[]} obstacles
- * @returns {void}
+ * @typedef {import('./objects/tux.js').Tux} Tux
+ * @param {Tux} tux
+ * @param {import('./objects/obstacle/obstacle.js').ObstacleObject[]} obstacles
+ * @returns {Tux}
  */
-export function handleObstacleCollisions (obstacles) {
+export function handleObstacleCollisions (tux, obstacles) {
   let onAnyObstacle = false
+  const newTux = { ...tux }
   obstacles.forEach((ob) => {
-    // Check collision from above (landing on obstacle)
+    // Landing on obstacle
     if (
-      tux.x + tux.width > ob.x
-      && tux.x < ob.x + ob.width
-      && tux.y + tux.height > ob.y
-      && tux.y + tux.height - tux.vy <= ob.y
+      newTux.x + newTux.width > ob.x
+      && newTux.x < ob.x + ob.width
+      && newTux.y + newTux.height > ob.y
+      && newTux.y + newTux.height - newTux.vy <= ob.y
     ) {
-      tux.y = ob.y - tux.height
-      tux.vy = 0
+      newTux.y = ob.y - newTux.height
+      newTux.vy = 0
       onAnyObstacle = true
     }
-    // Prevent walking through obstacle from the left
+    // Left collision
     if (
-      tux.x + tux.width > ob.x
-      && tux.x < ob.x
-      && tux.y + tux.height > ob.y
-      && tux.y < ob.y + ob.height
+      newTux.x + newTux.width > ob.x
+      && newTux.x < ob.x
+      && newTux.y + newTux.height > ob.y
+      && newTux.y < ob.y + ob.height
     ) {
-      tux.x = ob.x - tux.width
+      newTux.x = ob.x - newTux.width
     }
-    // Prevent walking through obstacle from the right
+    // Right collision
     if (
-      tux.x < ob.x + ob.width
-      && tux.x + tux.width > ob.x + ob.width
-      && tux.y + tux.height > ob.y
-      && tux.y < ob.y + ob.height
+      newTux.x < ob.x + ob.width
+      && newTux.x + newTux.width > ob.x + ob.width
+      && newTux.y + newTux.height > ob.y
+      && newTux.y < ob.y + ob.height
     ) {
-      tux.x = ob.x + ob.width
+      newTux.x = ob.x + ob.width
     }
   })
-  if (onAnyObstacle) {
-    tux.onGround = true
-  }
+  newTux.onGround = onAnyObstacle
+  return newTux
 }
