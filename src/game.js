@@ -1,3 +1,6 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+/* eslint-disable no-param-reassign */
+/* eslint-disable max-statements */
 import { tux, tuxImg } from './objects/tux.js'
 import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
@@ -7,10 +10,11 @@ import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
 let level = 0
-let obstacles, levelWidth, levelHeight, music, backgroundColor
+let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 let allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
+let score = 0
 
 const completeMusic = new Audio('./music/credits.ogg')
 const frameWidth = 32
@@ -45,6 +49,7 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
+  resetCoins()
   completeMusic.pause()
   if (allLevelsCompleted) {
     level = 0
@@ -55,6 +60,7 @@ function loadLevel (newLevel) {
   const levelData = getLevel(newLevel)
   if (!levelData) return 0
   obstacles = levelData.obstacles
+  coins = levelData.coins || []
   levelWidth = levelData.levelWidth || canvas.width
   levelHeight = Math.max(levelData.levelHeight, canvas.height)
 
@@ -82,6 +88,12 @@ function draw () {
   ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale)
 
   obstacles.forEach((ob) => ob.draw(ctx, cameraX))
+
+  // Draw coins
+  if (coins) {
+    coins.forEach((coin) => coin.draw(ctx, cameraX, 0))
+  }
+
   ctx.save()
   // Flip for left-facing
   if (tux.facing === -1) {
@@ -114,6 +126,22 @@ function draw () {
   const levelData = getLevel(level)
   ctx.fillText(`Level ${level + 1}: ${levelData.name}`, canvas.width / 2, 32)
 
+  let levelScore = score
+
+  if (coins) {
+    const collected = coins.filter((c) => c.collected).length
+    levelScore += collected
+    const total = coins.length
+    ctx.font = 'bold 20px sans-serif'
+    ctx.fillStyle = '#ffd700'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Coins: ${collected} / ${total}`, 32, 32)
+  }
+  ctx.font = 'bold 20px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'right'
+  ctx.fillText(`Score: ${levelScore}`, canvas.width - 32, 32)
+
   const progress = Math.max(0, Math.min(1, tux.x / (levelWidth - tux.width)))
   drawProgressBar(ctx, progress, canvas, scale)
 
@@ -134,6 +162,23 @@ function updateCamera () {
 /**
  *
  */
+function resetCoins () {
+  if (coins) {
+    coins.forEach((coin) => {
+      coin.collected = false
+    })
+  }
+}
+// Restart current level (after game over or manual restart)
+/**
+ *
+ */
+function restartLevel () {
+  loadLevel(level)
+}
+/**
+ *
+ */
 function update () {
   if (!tux.gameOver) {
     tux.x += tux.speed
@@ -143,8 +188,19 @@ function update () {
   Object.assign(tux, applyGravity(tux, levelHeight))
   Object.assign(tux, handleObstacleCollisions(tux, obstacles))
   Object.assign(tux, updateTuxAnimation(tux))
+
+  // --- Coin collection logic ---
+  if (coins) {
+    coins.forEach((coin) => {
+      if (coin.collidesWith(tux)) {
+        coin.collected = true
+      }
+    })
+  }
+
   if (tux.x + tux.width >= levelWidth) {
     if (getLevel(level + 1)) {
+      score += coins.filter((c) => c.collected).length
       level++
       loadLevel(level)
     } else {
@@ -168,7 +224,7 @@ document.addEventListener('keyup', (e) => {
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault()
   if (tux.gameOver) {
-    loadLevel(level) // Restart current level on touch if game over
+    restartLevel()
     return
   }
   keys[' '] = true
@@ -179,7 +235,7 @@ canvas.addEventListener('touchstart', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (tux.gameOver) {
-    loadLevel(level)
+    restartLevel()
   }
 })
 

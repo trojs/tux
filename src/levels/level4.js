@@ -1,4 +1,5 @@
 import { SnowObstacle } from '../objects/obstacle/snow.js'
+import { Coin } from '../objects/coin.js'
 
 const tileSize = 32
 const levelWidth = 155 * tileSize
@@ -17,14 +18,12 @@ const obstacles = [
   new SnowObstacle(42, 20, 8, 1),
   new SnowObstacle(55, 20, 8, 1),
   new SnowObstacle(67, 18, 4, 1),
-
   new SnowObstacle(73, 16, 4, 1),
   new SnowObstacle(78, 14, 4, 1),
   new SnowObstacle(83, 12, 4, 1),
   new SnowObstacle(88, 10, 4, 1),
   new SnowObstacle(93, 8, 4, 1),
   new SnowObstacle(98, 6, 4, 1),
-
   new SnowObstacle(111, 18, 4, 1),
   new SnowObstacle(120, 20, 5, 1),
   new SnowObstacle(125, 19, 1, 1),
@@ -43,6 +42,16 @@ const obstacles = [
   new SnowObstacle(146, 9, 30, 1)
 ]
 
+const coins = [
+  new Coin(5, 10, tileSize),
+  new Coin(27, 8, tileSize),
+  new Coin(44, 19, tileSize),
+  new Coin(70, 15, tileSize),
+  new Coin(100, 5, tileSize),
+  new Coin(130, 13, tileSize),
+  new Coin(150, 8, tileSize)
+]
+
 const backgroundImg = new Image()
 backgroundImg.src = '../sprites/tilesets/background5.png'
 
@@ -53,6 +62,7 @@ const backgroundColor = '#C387EC'
 
 export default {
   obstacles,
+  coins,
   backgroundImg,
   levelWidth,
   levelHeight,
