@@ -12,7 +12,7 @@ import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
-let allLevelsCompleted = false
+globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
 
@@ -51,10 +51,10 @@ function resizeCanvas () {
 function loadLevel (newLevel) {
   resetCoins()
   completeMusic.pause()
-  if (allLevelsCompleted) {
+  if (globalThis.allLevelsCompleted) {
     globalThis.level = 0
     tux.gameOver = false
-    allLevelsCompleted = false
+    globalThis.allLevelsCompleted = false
     return loadLevel(0)
   }
   const levelData = getLevel(newLevel)
@@ -146,7 +146,7 @@ function draw () {
   drawProgressBar(ctx, progress, canvas, scale)
 
   if (tux.gameOver) {
-    showGameOver(ctx, canvas, allLevelsCompleted, music, completeMusic)
+    showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
   }
 }
 
@@ -199,15 +199,15 @@ function update () {
   }
 
   if (tux.x + tux.width >= levelWidth) {
+    globalThis.score += coins.filter((c) => c.collected).length
     if (getLevel(globalThis.level + 1)) {
-      globalThis.score += coins.filter((c) => c.collected).length
       globalThis.level++
-      saveProgress()
       loadLevel(globalThis.level)
     } else {
       tux.gameOver = true
-      allLevelsCompleted = true
+      globalThis.allLevelsCompleted = true
     }
+    saveProgress()
   }
   updateCamera()
   draw()
