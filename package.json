@@ -8,21 +8,26 @@
     },
     "license": "MIT",
     "scripts": {
-        "lint": "eslint",
-        "lint:report": "eslint src/*.js -f json -o report.json",
-        "lint:fix": "eslint --fix",
-        "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=./coverage/lcov.info",
+        "lint": "eslint src",
+        "lint:report": "eslint src/*.js -f json -o report.json src",
+        "lint:fix": "eslint --fix src",
+        "test": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=./coverage/lcov.info src/**/*.test.js",
         "vulnerabilities": "npm audit --production",
-        "serve": "serve -p 3001 src"
+        "serve": "serve -p 3001 src",
+        "test:e2e": "playwright test",
+        "test:e2e-ui": "playwright test --ui --debug"
     },
     "type": "module",
     "main": "src/index.js",
     "source": "src/index.js",
     "module": "src/index.js",
     "devDependencies": {
+        "@playwright/test": "^1.52.0",
         "@trojs/lint": "^0.2.9",
         "eslint": "^9.15.0",
         "globals": "^16.0.0",
+        "monocart-reporter": "^2.9.19",
+        "playwright": "^1.52.0",
         "serve": "^14.2.4"
     },
     "repository": {

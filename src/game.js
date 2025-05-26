@@ -9,10 +9,10 @@ import { playMusic } from './music.js'
 import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
-let level = Number(localStorage.getItem('tux_level')) || 0
-let score = Number(localStorage.getItem('tux_score')) || 0
+globalThis.level = Number(localStorage.getItem('tux_level')) || 0
+globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
-let allLevelsCompleted = false
+globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
 
@@ -51,10 +51,10 @@ function resizeCanvas () {
 function loadLevel (newLevel) {
   resetCoins()
   completeMusic.pause()
-  if (allLevelsCompleted) {
-    level = 0
+  if (globalThis.allLevelsCompleted) {
+    globalThis.level = 0
     tux.gameOver = false
-    allLevelsCompleted = false
+    globalThis.allLevelsCompleted = false
     return loadLevel(0)
   }
   const levelData = getLevel(newLevel)
@@ -123,10 +123,10 @@ function draw () {
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   // Get level name if available
-  const levelData = getLevel(level)
-  ctx.fillText(`Level ${level + 1}: ${levelData.name}`, canvas.width / 2, 32)
+  const levelData = getLevel(globalThis.level)
+  ctx.fillText(`Level ${globalThis.level + 1}: ${levelData.name}`, canvas.width / 2, 32)
 
-  let levelScore = score
+  let levelScore = globalThis.score
 
   if (coins) {
     const collected = coins.filter((c) => c.collected).length
@@ -146,7 +146,7 @@ function draw () {
   drawProgressBar(ctx, progress, canvas, scale)
 
   if (tux.gameOver) {
-    showGameOver(ctx, canvas, allLevelsCompleted, music, completeMusic)
+    showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
   }
 }
 
@@ -173,8 +173,8 @@ function resetCoins () {
 /**
  *
  */
-function restartLevel () {
-  loadLevel(level)
+globalThis.restartLevel = () => {
+  loadLevel(globalThis.level)
 }
 /**
  *
@@ -199,18 +199,19 @@ function update () {
   }
 
   if (tux.x + tux.width >= levelWidth) {
-    if (getLevel(level + 1)) {
-      score += coins.filter((c) => c.collected).length
-      level++
-      saveProgress()
-      loadLevel(level)
+    globalThis.score += coins.filter((c) => c.collected).length
+    if (getLevel(globalThis.level + 1)) {
+      globalThis.level++
+      loadLevel(globalThis.level)
     } else {
       tux.gameOver = true
-      allLevelsCompleted = true
+      globalThis.allLevelsCompleted = true
     }
+    saveProgress()
   }
   updateCamera()
   draw()
+  globalThis.tux = tux
   requestAnimationFrame(update)
 }
 
@@ -218,8 +219,8 @@ function update () {
  *
  */
 function saveProgress () {
-  localStorage.setItem('tux_level', level)
-  localStorage.setItem('tux_score', score)
+  localStorage.setItem('tux_level', globalThis.level)
+  localStorage.setItem('tux_score', globalThis.score)
 }
 
 document.addEventListener('keydown', (e) => {
@@ -233,7 +234,7 @@ document.addEventListener('keyup', (e) => {
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault()
   if (tux.gameOver) {
-    restartLevel()
+    globalThis.restartLevel()
     return
   }
   keys[' '] = true
@@ -244,13 +245,13 @@ canvas.addEventListener('touchstart', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (tux.gameOver) {
-    restartLevel()
+    globalThis.restartLevel()
   }
 })
 
 window.addEventListener('resize', resizeCanvas)
 tuxImg.onload = () => {
-  loadLevel(level)
+  loadLevel(globalThis.level)
   update()
   resizeCanvas()
 }
