@@ -134,3 +134,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+playwright/
+playwright-report/
+test-results/
+monocart-report/
