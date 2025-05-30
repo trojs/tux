@@ -26,6 +26,7 @@ let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
+let clickableObjects = []
 
 const introMusic = new Audio('./music/intro.ogg')
 introMusic.loop = true
@@ -102,6 +103,10 @@ function loadLevel (newLevel) {
  * @returns {void}
  */
 function drawMenu () {
+  if (music) music.pause()
+  completeMusic.pause()
+  introMusic.play()
+  clickableObjects = []
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = '#222'
@@ -113,13 +118,23 @@ function drawMenu () {
   ctx.font = 'bold 32px sans-serif'
   ctx.fillText('Choose your character:', canvas.width / 2, 200)
   CHARACTERS.forEach((char, i) => {
+    const x = canvas.width / 2
+    const y = 270 + i * 60
     ctx.font = globalThis.character === char ? 'bold 36px sans-serif' : '32px sans-serif'
     ctx.fillStyle = globalThis.character === char ? '#ffd700' : '#fff'
     ctx.fillText(
       char.charAt(0).toUpperCase() + char.slice(1),
-      canvas.width / 2,
-      270 + i * 60
+      x,
+      y
     )
+    clickableObjects.push({
+      type: 'character',
+      value: char,
+      x: x - 100,
+      y: y - 30,
+      width: 200,
+      height: 40
+    })
   })
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
@@ -127,9 +142,62 @@ function drawMenu () {
 }
 
 /**
+ * Get the pointer (mouse or touch) position relative to the canvas.
+ * @param {MouseEvent | TouchEvent} event - The pointer event.
+ * @returns {{ x: number, y: number }} The x and y coordinates relative to the canvas.
+ */
+function getPointerPos (event) {
+  const rect = canvas.getBoundingClientRect()
+  let x, y
+  if (event.touches && event.touches.length > 0) {
+    x = event.touches[0].clientX - rect.left
+    y = event.touches[0].clientY - rect.top
+  } else {
+    x = event.clientX - rect.left
+    y = event.clientY - rect.top
+  }
+  return { x, y }
+}
+
+/**
+ * Handle clicks or touches on the canvas and trigger actions for clickable objects.
+ * @param {MouseEvent | TouchEvent} event - The pointer event.
+ * @returns {void}
+ */
+function handleCanvasClick (event) {
+  const { x, y } = getPointerPos(event)
+  for (const obj of clickableObjects) {
+    if (
+      x >= obj.x
+      && x <= obj.x + obj.width
+      && y >= obj.y
+      && y <= obj.y + obj.height
+    ) {
+      if (obj.type === 'character') {
+        globalThis.character = obj.value
+        handleAction('confirm')
+      }
+      if (obj.type === 'level') {
+        globalThis.level = obj.value
+        handleAction('confirm')
+      }
+      if (obj.type === 'menu') {
+        handleAction(obj.value)
+      }
+      return
+    }
+  }
+  handlePointerMenuAction()
+}
+
+/**
  *
  */
 function drawLevelSelect () {
+  if (music) music.pause()
+  completeMusic.pause()
+  introMusic.play()
+  clickableObjects = []
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = '#222'
@@ -139,9 +207,20 @@ function drawLevelSelect () {
   ctx.textAlign = 'center'
   ctx.fillText('Choose Level', canvas.width / 2, 120)
   for (let i = 0; i < LEVEL_COUNT; i++) {
+    const x = canvas.width / 2
+    const y = 200 + i * 50
     ctx.font = globalThis.level === i ? 'bold 32px sans-serif' : '28px sans-serif'
     ctx.fillStyle = globalThis.level === i ? '#ffd700' : '#fff'
-    ctx.fillText(`Level ${i + 1}`, canvas.width / 2, 200 + i * 50)
+    ctx.fillText(`Level ${i + 1}`, x, y)
+
+    clickableObjects.push({
+      type: 'level',
+      value: i,
+      x: x - 100,
+      y: y - 25,
+      width: 200,
+      height: 40
+    })
   }
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
@@ -159,13 +238,11 @@ function draw (tux) {
 
   obstacles.forEach((ob) => ob.draw(ctx, cameraX))
 
-  // Draw coins
   if (coins) {
     coins.forEach((coin) => coin.draw(ctx, cameraX, 0))
   }
 
   ctx.save()
-  // Flip for left-facing
   if (tux.facing === -1) {
     ctx.translate(tux.x - cameraX + tux.width / 2, tux.y + tux.height / 2)
     ctx.scale(-1, 1)
@@ -188,11 +265,10 @@ function draw (tux) {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
 
-  // Show current level at the top center
   ctx.font = 'bold 20px sans-serif'
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
-  // Get level name if available
+
   const levelData = getLevel(globalThis.level)
   ctx.fillText(`Level ${globalThis.level + 1}: ${levelData.name}`, canvas.width / 2, 32)
 
@@ -216,7 +292,7 @@ function draw (tux) {
   drawProgressBar(ctx, progress, canvas, scale)
 
   if (tux.gameOver) {
-    showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
+    clickableObjects = showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
   }
 }
 
@@ -242,7 +318,7 @@ function resetCoins () {
     })
   }
 }
-// Restart current level (after game over or manual restart)
+
 /**
  *
  */
@@ -266,7 +342,7 @@ function update () {
     return
   }
   if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
-    showGameOver(ctx, canvas, globalThis.gameState === 'complete', music, completeMusic)
+    clickableObjects = showGameOver(ctx, canvas, globalThis.gameState === 'complete', music, completeMusic)
     return
   }
   if (!tux.gameOver) {
@@ -281,7 +357,6 @@ function update () {
   Object.assign(tux, handleObstacleCollisions(tux, obstacles))
   Object.assign(tux, updateTuxAnimation(tux))
 
-  // --- Coin collection logic ---
   if (coins) {
     coins.forEach((coin) => {
       if (coin.collidesWith(tux)) {
@@ -392,10 +467,9 @@ document.addEventListener('keyup', (event) => {
  *
  */
 function handlePointerMenuAction () {
-  // For menus, treat as "confirm" or "menu" depending on state
   if (globalThis.gameState === 'start') handleAction('confirm')
   else if (globalThis.gameState === 'levelselect') handleAction('confirm')
-  else if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') handleAction('menu')
+  else if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') handleAction('restart')
   else {
     keys[' '] = true
     setTimeout(() => {
@@ -406,12 +480,12 @@ function handlePointerMenuAction () {
 
 canvas.addEventListener('touchstart', (event) => {
   event.preventDefault()
-  handlePointerMenuAction()
+  handleCanvasClick(event)
 })
 
 canvas.addEventListener('mousedown', (event) => {
   event.preventDefault()
-  handlePointerMenuAction()
+  handleCanvasClick(event)
 })
 
 window.addEventListener('resize', resizeCanvas)

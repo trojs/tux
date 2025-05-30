@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable no-param-reassign */
 /**
  *
@@ -33,13 +34,15 @@ export function drawProgressBar (ctx, progress, canvas, scale) {
 
 /**
  *
- * @param {CanvasRenderingContext2D}ctx
+ * @param {CanvasRenderingContext2D} ctx
  * @param {HTMLCanvasElement} canvas
  * @param {boolean} allLevelsCompleted
  * @param {HTMLAudioElement} music
  * @param {HTMLAudioElement} completeMusic
+ * @returns {Array<{type: string, value: string, x: number, y: number, width: number, height: number}>}
  */
 export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMusic) {
+  const clickableObjects = []
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = 'rgba(0,0,0,0.7)'
@@ -56,11 +59,31 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   } else {
     ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20)
   }
+
   ctx.font = 'bold 28px sans-serif'
   ctx.fillStyle = '#ffd700'
+
   ctx.fillText('1: Restart Level', canvas.width / 2, 300)
+  clickableObjects.push({
+    type: 'menu',
+    value: 'restart',
+    x: canvas.width / 2 - 150,
+    y: 300 - 30,
+    width: 300,
+    height: 40
+  })
+
   ctx.fillText('2: Choose Character', canvas.width / 2, 360)
+  clickableObjects.push({
+    type: 'menu',
+    value: 'menu',
+    x: canvas.width / 2 - 150,
+    y: 360 - 30,
+    width: 300,
+    height: 40
+  })
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
   ctx.fillText('Press 1 or 2, or use Arrow keys and Enter/Space', canvas.width / 2, canvas.height - 40)
+  return clickableObjects
 }
