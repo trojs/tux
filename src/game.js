@@ -1,3 +1,5 @@
+/* eslint-disable complexity */
+/* eslint-disable max-depth */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable no-param-reassign */
@@ -444,6 +446,11 @@ function handleAction (action) {
     update()
   }
   if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
+    if (action === 'up' || action === 'down') {
+      globalThis.menuSelection = (globalThis.menuSelection === 'restart') ? 'menu' : 'restart'
+      update()
+      return
+    }
     if (action === 'restart') {
       if (globalThis.gameState === 'complete') {
         globalThis.level = 0
@@ -453,7 +460,11 @@ function handleAction (action) {
       update()
       return
     }
-    if (action === 'menu' || action === 'confirm') {
+    if (action === 'confirm') {
+      handleAction(globalThis.menuSelection)
+      return
+    }
+    if (action === 'menu') {
       globalThis.gameState = 'start'
       update()
       return
@@ -502,6 +513,38 @@ canvas.addEventListener('touchstart', (event) => {
 canvas.addEventListener('mousedown', (event) => {
   event.preventDefault()
   handleCanvasClick(event)
+})
+canvas.addEventListener('mousemove', (event) => {
+  const { x, y } = getPointerPos(event)
+  for (const obj of clickableObjects) {
+    if (
+      x >= obj.x
+      && x <= obj.x + obj.width
+      && y >= obj.y
+      && y <= obj.y + obj.height
+    ) {
+      if ((obj.type === 'menu') && (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete')) {
+        if (globalThis.menuSelection !== obj.value) {
+          globalThis.menuSelection = obj.value
+          update()
+        }
+        return
+      }
+      if (obj.type === 'character' && globalThis.gameState === 'start') {
+        if (globalThis.character !== obj.value) {
+          globalThis.character = obj.value
+          update()
+        }
+      }
+      if (obj.type === 'level' && globalThis.gameState === 'levelselect') {
+        if (globalThis.level !== obj.value) {
+          globalThis.level = obj.value
+          update()
+        }
+      }
+      return
+    }
+  }
 })
 
 window.addEventListener('resize', resizeCanvas)

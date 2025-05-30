@@ -61,7 +61,7 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   }
 
   ctx.font = 'bold 28px sans-serif'
-  ctx.fillStyle = '#ffd700'
+  ctx.fillStyle = globalThis.menuSelection === 'restart' ? '#ffd700' : '#fff'
 
   ctx.fillText('1: Restart Level', canvas.width / 2, 300)
   clickableObjects.push({
@@ -73,6 +73,7 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
     height: 40
   })
 
+  ctx.fillStyle = globalThis.menuSelection === 'menu' ? '#ffd700' : '#fff'
   ctx.fillText('2: Choose Character', canvas.width / 2, 360)
   clickableObjects.push({
     type: 'menu',
