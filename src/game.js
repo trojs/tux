@@ -151,14 +151,16 @@ function drawMenu () {
  */
 function getPointerPos (event) {
   const rect = canvas.getBoundingClientRect()
-  let x, y
+  let clientX, clientY
   if (event.touches && event.touches.length > 0) {
-    x = event.touches[0].clientX - rect.left
-    y = event.touches[0].clientY - rect.top
+    clientX = event.touches[0].clientX
+    clientY = event.touches[0].clientY
   } else {
-    x = event.clientX - rect.left
-    y = event.clientY - rect.top
+    clientX = event.clientX
+    clientY = event.clientY
   }
+  const x = (clientX - rect.left) * (canvas.width / rect.width)
+  const y = (clientY - rect.top) * (canvas.height / rect.height)
   return { x, y }
 }
 
