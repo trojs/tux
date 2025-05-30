@@ -4,11 +4,9 @@ import { expect, test } from '@playwright/test'
 test('Tux can complete level 2 and collect coins', async ({ page }) => {
   await page.goto('http://localhost:3001/')
 
-  // Set the game to start at level 2 (index 1)
-  await page.evaluate(() => { globalThis.level = 1 })
-
-  // Restart the level to ensure it loads level 2
-  await page.evaluate(() => { globalThis.restartLevel() })
+  await page.keyboard.press(' ')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press(' ')
 
   // Define jump points for level 2 (adjust as needed for your level design)
   const jumpPoints = [

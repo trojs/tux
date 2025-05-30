@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-statements */
@@ -11,8 +12,13 @@ import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
 /**
  * @typedef {import('./objects/character.js').Character} Character
+ * @typedef {'start' | 'levelselect' | 'playing' | 'gameover' | 'complete'} GameState
  */
 
+const CHARACTERS = ['tux', 'katie'] // @todo: get characters from character.js
+const LEVEL_COUNT = 6 // @todo: get levels from levels.js
+/** @type {GameState} */
+globalThis.gameState = localStorage.getItem('tux_game_state') || 'start'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 globalThis.character = localStorage.getItem('tux_character') || 'tux'
@@ -89,6 +95,86 @@ function loadLevel (newLevel) {
 }
 
 /**
+ * @returns {void}
+ */
+function drawMenu () {
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = '#222'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = 'bold 48px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.fillText('Tux Platformer', canvas.width / 2, 100)
+  ctx.font = 'bold 32px sans-serif'
+  ctx.fillText('Choose your character:', canvas.width / 2, 200)
+  CHARACTERS.forEach((char, i) => {
+    ctx.font = globalThis.character === char ? 'bold 36px sans-serif' : '32px sans-serif'
+    ctx.fillStyle = globalThis.character === char ? '#ffd700' : '#fff'
+    ctx.fillText(
+      char.charAt(0).toUpperCase() + char.slice(1),
+      canvas.width / 2,
+      270 + i * 60
+    )
+  })
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+}
+
+/**
+ *
+ */
+function drawLevelSelect () {
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = '#222'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = 'bold 36px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.fillText('Choose Level', canvas.width / 2, 120)
+  for (let i = 0; i < LEVEL_COUNT; i++) {
+    ctx.font = globalThis.level === i ? 'bold 32px sans-serif' : '28px sans-serif'
+    ctx.fillStyle = globalThis.level === i ? '#ffd700' : '#fff'
+    ctx.fillText(`Level ${i + 1}`, canvas.width / 2, 200 + i * 50)
+  }
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+}
+
+/**
+ *
+ * @param {boolean} allLevelsCompleted
+ * @returns {void}
+ */
+function drawGameOverMenu (allLevelsCompleted) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = 'rgba(0,0,0,0.7)'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = 'bold 48px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  if (allLevelsCompleted) {
+    ctx.fillText('Congratulations!', canvas.width / 2, 120)
+    ctx.font = '32px sans-serif'
+    ctx.fillText('You completed all levels!', canvas.width / 2, 180)
+  } else {
+    ctx.fillText('Game Over!', canvas.width / 2, 150)
+  }
+  ctx.font = 'bold 28px sans-serif'
+  ctx.fillStyle = '#ffd700'
+  ctx.fillText('1: Restart Level', canvas.width / 2, 300)
+  ctx.fillText('2: Choose Character', canvas.width / 2, 360)
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Press 1 or 2, or use Arrow keys and Enter/Space', canvas.width / 2, canvas.height - 40)
+}
+
+/**
+ *
  * @param {Character} tux
  * @returns {void}
  */
@@ -170,6 +256,7 @@ function updateCamera (tux) {
   if (cameraX < 0) cameraX = 0
   if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width
 }
+
 /**
  *
  */
@@ -192,6 +279,18 @@ globalThis.restartLevel = () => {
  */
 function update () {
   const tux = getCharacter(globalThis.character)
+  if (globalThis.gameState === 'start') {
+    drawMenu()
+    return
+  }
+  if (globalThis.gameState === 'levelselect') {
+    drawLevelSelect()
+    return
+  }
+  if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
+    drawGameOverMenu(globalThis.gameState === 'complete')
+    return
+  }
   if (!tux.gameOver) {
     tux.x += tux.speed
   } else if (keys['ArrowUp'] || keys[' '] || keys['Space']) {
@@ -220,7 +319,10 @@ function update () {
       loadLevel(globalThis.level)
     } else {
       tux.gameOver = true
-      globalThis.allLevelsCompleted = true
+      globalThis.gameState = 'complete'
+      if (music) music.pause()
+      completeMusic.currentTime = 0
+      completeMusic.play()
     }
     saveProgress()
   }
@@ -238,30 +340,100 @@ function saveProgress () {
   localStorage.setItem('tux_level', globalThis.level)
   localStorage.setItem('tux_score', globalThis.score)
   localStorage.setItem('tux_character', globalThis.character)
+  localStorage.setItem('tux_game_state', globalThis.gameState)
 }
 
+/**
+ * Handle all menu/game actions in one place.
+ * @param {'up'|'down'|'confirm'|'restart'|'menu'} action
+ */
+function handleAction (action) {
+  if (globalThis.gameState === 'start') {
+    if (action === 'up') {
+      let idx = CHARACTERS.indexOf(globalThis.character)
+      idx = (idx - 1 + CHARACTERS.length) % CHARACTERS.length
+      globalThis.character = CHARACTERS[idx]
+    }
+    if (action === 'down') {
+      let idx = CHARACTERS.indexOf(globalThis.character)
+      idx = (idx + 1) % CHARACTERS.length
+      globalThis.character = CHARACTERS[idx]
+    }
+    if (action === 'confirm') {
+      globalThis.gameState = 'levelselect'
+    }
+    update()
+    return
+  }
+  if (globalThis.gameState === 'levelselect') {
+    if (action === 'up') {
+      globalThis.level = (globalThis.level - 1 + LEVEL_COUNT) % LEVEL_COUNT
+    }
+    if (action === 'down') {
+      globalThis.level = (globalThis.level + 1) % LEVEL_COUNT
+    }
+    if (action === 'confirm') {
+      globalThis.gameState = 'playing'
+      loadLevel(globalThis.level)
+      saveProgress()
+    }
+    update()
+  }
+  if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
+    if (action === 'restart') {
+      if (globalThis.gameState === 'complete') {
+        globalThis.level = 0
+      }
+      globalThis.gameState = 'playing'
+      loadLevel(globalThis.level)
+      update()
+      return
+    }
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
+    }
+    update()
+  }
+}
 document.addEventListener('keydown', (event) => {
   keys[event.key] = true
+  if (event.key === 'ArrowUp') handleAction('up')
+  else if (event.key === 'ArrowDown') handleAction('down')
+  else if (event.key === 'Enter' || event.key === ' ') handleAction('confirm')
+  else if (event.key === '1') handleAction('restart')
+  else if (event.key === '2') handleAction('menu')
 })
 
 document.addEventListener('keyup', (event) => {
   keys[event.key] = false
 })
 
+/**
+ *
+ */
+function handlePointerMenuAction () {
+  // For menus, treat as "confirm" or "menu" depending on state
+  if (globalThis.gameState === 'start') handleAction('confirm')
+  else if (globalThis.gameState === 'levelselect') handleAction('confirm')
+  else if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') handleAction('menu')
+  else {
+    keys[' '] = true
+    setTimeout(() => {
+      keys[' '] = false
+    }, 100)
+  }
+}
+
 canvas.addEventListener('touchstart', (event) => {
   event.preventDefault()
-  keys[' '] = true
-  setTimeout(() => {
-    keys[' '] = false
-  }, 100)
+  handlePointerMenuAction()
 })
 
 canvas.addEventListener('mousedown', (event) => {
   event.preventDefault()
-  keys[' '] = true
-  setTimeout(() => {
-    keys[' '] = false
-  }, 100)
+  handlePointerMenuAction()
 })
 
 window.addEventListener('resize', resizeCanvas)
