@@ -162,7 +162,7 @@ function draw (tux) {
 /**
  *
  * @param {Character} tux
- * returns {void}
+ * @returns {void}
  */
 function updateCamera (tux) {
   cameraX = tux.x + tux.width / 2 - canvas.width / 2
