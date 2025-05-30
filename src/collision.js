@@ -1,8 +1,8 @@
 /**
- * @typedef {import('./objects/tux.js').Tux} Tux
- * @param {Tux} tux
+ * @typedef {import('./objects/character.js').Character} Character
+ * @param {Character} tux
  * @param {import('./objects/obstacle/obstacle.js').ObstacleObject[]} obstacles
- * @returns {Tux}
+ * @returns {Character}
  */
 export function handleObstacleCollisions (tux, obstacles) {
   let onAnyObstacle = false

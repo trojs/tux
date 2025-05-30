@@ -10,7 +10,7 @@ import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
 /**
- * @typedef {import('./objects/tux.js').Tux} Tux
+ * @typedef {import('./objects/character.js').Character} Character
  */
 
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
@@ -89,7 +89,7 @@ function loadLevel (newLevel) {
 }
 
 /**
- * @param {Tux} tux
+ * @param {Character} tux
  * @returns {void}
  */
 function draw (tux) {
@@ -161,7 +161,7 @@ function draw (tux) {
 
 /**
  *
- * @param {Tux} tux
+ * @param {Character} tux
  * returns {void}
  */
 function updateCamera (tux) {
