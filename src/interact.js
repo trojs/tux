@@ -1,5 +1,4 @@
 const walkFrameCount = 8
-const walkRow = 1
 const idleRow = 0
 const animSpeed = 5
 
@@ -63,7 +62,7 @@ export function updateTuxAnimation (tux) {
   newTux.facing = 1
 
   if (newTux.onGround) {
-    newTux.animRow = walkRow
+    newTux.animRow = newTux.walkRow || 1 // Use per-character walk row
     newTux.animTimer = (newTux.animTimer || 0) + 1
     if (newTux.animTimer >= animSpeed) {
       newTux.animFrame = ((newTux.animFrame || 0) + 1) % walkFrameCount

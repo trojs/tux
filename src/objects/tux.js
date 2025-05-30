@@ -15,6 +15,7 @@ export const tux = {
   animFrame: 0,
   animTimer: 0,
   animRow: 1,
+  walkRow: 1,
   facing: 1,
   gameOver: false,
   img: tuxImg

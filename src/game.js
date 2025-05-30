@@ -15,11 +15,11 @@ import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
+globalThis.character = localStorage.getItem('tux_character') || 'tux'
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
-const character = 'tux'
 
 const completeMusic = new Audio('./music/credits.ogg')
 const frameWidth = 32
@@ -54,7 +54,7 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
-  const tux = getCharacter(character)
+  const tux = getCharacter(globalThis.character)
   resetCoins()
   completeMusic.pause()
   if (globalThis.allLevelsCompleted) {
@@ -191,7 +191,7 @@ globalThis.restartLevel = () => {
  *
  */
 function update () {
-  const tux = getCharacter(character)
+  const tux = getCharacter(globalThis.character)
   if (!tux.gameOver) {
     tux.x += tux.speed
   } else if (keys['ArrowUp'] || keys[' '] || keys['Space']) {
@@ -237,6 +237,7 @@ function update () {
 function saveProgress () {
   localStorage.setItem('tux_level', globalThis.level)
   localStorage.setItem('tux_score', globalThis.score)
+  localStorage.setItem('tux_character', globalThis.character)
 }
 
 document.addEventListener('keydown', (event) => {
