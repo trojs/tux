@@ -6,7 +6,7 @@ let started = false
  * @returns {void}
  */
 export function playMusic (music) {
-  if (!started) {
+  if (!started && music instanceof HTMLAudioElement) {
     music.volume = 0.5
     music.play()
     started = true

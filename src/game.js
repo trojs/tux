@@ -1,7 +1,10 @@
+/* eslint-disable complexity */
+/* eslint-disable max-depth */
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-statements */
-import { tux, tuxImg } from './objects/tux.js'
+import getCharacter from './objects/character.js'
 import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
@@ -9,14 +12,28 @@ import { playMusic } from './music.js'
 import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
+/**
+ * @typedef {import('./objects/character.js').Character} Character
+ * @typedef {'start' | 'levelselect' | 'playing' | 'gameover' | 'complete'} GameState
+ */
+
+const CHARACTERS = ['tux', 'katie'] // @todo: get characters from character.js
+const LEVEL_COUNT = 6 // @todo: get levels from levels.js
+/** @type {GameState} */
+globalThis.gameState = 'start'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
+globalThis.character = localStorage.getItem('tux_character') || 'tux'
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
+let clickableObjects = []
 
+const introMusic = new Audio('./music/intro.ogg')
+introMusic.loop = true
 const completeMusic = new Audio('./music/credits.ogg')
+completeMusic.loop = true
 const frameWidth = 32
 const frameHeight = 32
 
@@ -49,7 +66,9 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
+  const tux = getCharacter(globalThis.character)
   resetCoins()
+  introMusic.pause()
   completeMusic.pause()
   if (globalThis.allLevelsCompleted) {
     globalThis.level = 0
@@ -74,34 +93,164 @@ function loadLevel (newLevel) {
   tux.y = 300
   tux.vy = 0
   tux.gameOver = false
-  playMusic(music)
-  music.play()
+  if (music) {
+    playMusic(music)
+    music.play()
+  }
   updateScale(levelData)
   return newLevel
 }
 
 /**
+ * @returns {void}
+ */
+function drawMenu () {
+  if (music) music.pause()
+  completeMusic.pause()
+  introMusic.play()
+  clickableObjects = []
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = '#222'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = 'bold 48px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.fillText('Tux Platformer', canvas.width / 2, 100)
+  ctx.font = 'bold 32px sans-serif'
+  ctx.fillText('Choose your character:', canvas.width / 2, 200)
+  CHARACTERS.forEach((char, i) => {
+    const x = canvas.width / 2
+    const y = 270 + i * 60
+    ctx.font = globalThis.character === char ? 'bold 36px sans-serif' : '32px sans-serif'
+    ctx.fillStyle = globalThis.character === char ? '#ffd700' : '#fff'
+    ctx.fillText(
+      char.charAt(0).toUpperCase() + char.slice(1),
+      x,
+      y
+    )
+    clickableObjects.push({
+      type: 'character',
+      value: char,
+      x: x - 100,
+      y: y - 30,
+      width: 200,
+      height: 40
+    })
+  })
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+}
+
+/**
+ * Get the pointer (mouse or touch) position relative to the canvas.
+ * @param {MouseEvent | TouchEvent} event - The pointer event.
+ * @returns {{ x: number, y: number }} The x and y coordinates relative to the canvas.
+ */
+function getPointerPos (event) {
+  const rect = canvas.getBoundingClientRect()
+  let x, y
+  if (event.touches && event.touches.length > 0) {
+    x = event.touches[0].clientX - rect.left
+    y = event.touches[0].clientY - rect.top
+  } else {
+    x = event.clientX - rect.left
+    y = event.clientY - rect.top
+  }
+  return { x, y }
+}
+
+/**
+ * Handle clicks or touches on the canvas and trigger actions for clickable objects.
+ * @param {MouseEvent | TouchEvent} event - The pointer event.
+ * @returns {void}
+ */
+function handleCanvasClick (event) {
+  const { x, y } = getPointerPos(event)
+  for (const obj of clickableObjects) {
+    if (
+      x >= obj.x
+      && x <= obj.x + obj.width
+      && y >= obj.y
+      && y <= obj.y + obj.height
+    ) {
+      if (obj.type === 'character') {
+        globalThis.character = obj.value
+        handleAction('confirm')
+      }
+      if (obj.type === 'level') {
+        globalThis.level = obj.value
+        handleAction('confirm')
+      }
+      if (obj.type === 'menu') {
+        handleAction(obj.value)
+      }
+      return
+    }
+  }
+  handlePointerMenuAction()
+}
+
+/**
  *
  */
-function draw () {
+function drawLevelSelect () {
+  if (music) music.pause()
+  completeMusic.pause()
+  introMusic.play()
+  clickableObjects = []
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = '#222'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = 'bold 36px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.fillText('Choose Level', canvas.width / 2, 120)
+  for (let i = 0; i < LEVEL_COUNT; i++) {
+    const x = canvas.width / 2
+    const y = 200 + i * 50
+    ctx.font = globalThis.level === i ? 'bold 32px sans-serif' : '28px sans-serif'
+    ctx.fillStyle = globalThis.level === i ? '#ffd700' : '#fff'
+    ctx.fillText(`Level ${i + 1}`, x, y)
+
+    clickableObjects.push({
+      type: 'level',
+      value: i,
+      x: x - 100,
+      y: y - 25,
+      width: 200,
+      height: 40
+    })
+  }
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+}
+
+/**
+ *
+ * @param {Character} tux
+ * @returns {void}
+ */
+function draw (tux) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0)
   ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale)
 
   obstacles.forEach((ob) => ob.draw(ctx, cameraX))
 
-  // Draw coins
   if (coins) {
     coins.forEach((coin) => coin.draw(ctx, cameraX, 0))
   }
 
   ctx.save()
-  // Flip for left-facing
   if (tux.facing === -1) {
     ctx.translate(tux.x - cameraX + tux.width / 2, tux.y + tux.height / 2)
     ctx.scale(-1, 1)
     ctx.translate(-tux.width / 2, -tux.height / 2)
     ctx.drawImage(
-      tuxImg,
+      tux.img,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       0, 0,
@@ -109,7 +258,7 @@ function draw () {
     )
   } else {
     ctx.drawImage(
-      tuxImg,
+      tux.img,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       tux.x - cameraX, tux.y,
@@ -118,11 +267,10 @@ function draw () {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
 
-  // Show current level at the top center
   ctx.font = 'bold 20px sans-serif'
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
-  // Get level name if available
+
   const levelData = getLevel(globalThis.level)
   ctx.fillText(`Level ${globalThis.level + 1}: ${levelData.name}`, canvas.width / 2, 32)
 
@@ -146,19 +294,22 @@ function draw () {
   drawProgressBar(ctx, progress, canvas, scale)
 
   if (tux.gameOver) {
-    showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
+    clickableObjects = showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
   }
 }
 
 /**
  *
+ * @param {Character} tux
+ * @returns {void}
  */
-function updateCamera () {
+function updateCamera (tux) {
   cameraX = tux.x + tux.width / 2 - canvas.width / 2
 
   if (cameraX < 0) cameraX = 0
   if (cameraX > levelWidth - canvas.width) cameraX = levelWidth - canvas.width
 }
+
 /**
  *
  */
@@ -169,7 +320,7 @@ function resetCoins () {
     })
   }
 }
-// Restart current level (after game over or manual restart)
+
 /**
  *
  */
@@ -180,16 +331,34 @@ globalThis.restartLevel = () => {
  *
  */
 function update () {
+  const tux = getCharacter(globalThis.character)
+  if (tux.gameOver && globalThis.gameState === 'playing') {
+    globalThis.gameState = 'gameover'
+  }
+  if (globalThis.gameState === 'start') {
+    drawMenu()
+    return
+  }
+  if (globalThis.gameState === 'levelselect') {
+    drawLevelSelect()
+    return
+  }
+  if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
+    clickableObjects = showGameOver(ctx, canvas, globalThis.gameState === 'complete', music, completeMusic)
+    return
+  }
   if (!tux.gameOver) {
     tux.x += tux.speed
+  } else if (keys['ArrowUp'] || keys[' '] || keys['Space']) {
+    globalThis.restartLevel()
   }
+
   Object.assign(tux, handleInput(tux, levelWidth))
   Object.assign(tux, jump(tux, keys))
   Object.assign(tux, applyGravity(tux, levelHeight))
   Object.assign(tux, handleObstacleCollisions(tux, obstacles))
   Object.assign(tux, updateTuxAnimation(tux))
 
-  // --- Coin collection logic ---
   if (coins) {
     coins.forEach((coin) => {
       if (coin.collidesWith(tux)) {
@@ -205,12 +374,16 @@ function update () {
       loadLevel(globalThis.level)
     } else {
       tux.gameOver = true
-      globalThis.allLevelsCompleted = true
+      globalThis.gameState = 'complete'
+      if (music) music.pause()
+      completeMusic.currentTime = 0
+      completeMusic.play()
     }
     saveProgress()
   }
-  updateCamera()
-  draw()
+
+  updateCamera(tux)
+  draw(tux)
   globalThis.tux = tux
   requestAnimationFrame(update)
 }
@@ -221,37 +394,163 @@ function update () {
 function saveProgress () {
   localStorage.setItem('tux_level', globalThis.level)
   localStorage.setItem('tux_score', globalThis.score)
+  localStorage.setItem('tux_character', globalThis.character)
+  localStorage.setItem('tux_game_state', globalThis.gameState)
 }
 
-document.addEventListener('keydown', (e) => {
-  keys[e.key] = true
-})
+/**
+ * Handle all menu/game actions in one place.
+ * @param {('up'|'down'|'confirm'|'restart'|'menu')=} action
+ */
+function handleAction (action) {
+  if (globalThis.gameState === 'start') {
+    if (action === 'up') {
+      let idx = CHARACTERS.indexOf(globalThis.character)
+      idx = (idx - 1 + CHARACTERS.length) % CHARACTERS.length
+      globalThis.character = CHARACTERS[idx]
+    }
+    if (action === 'down') {
+      let idx = CHARACTERS.indexOf(globalThis.character)
+      idx = (idx + 1) % CHARACTERS.length
+      globalThis.character = CHARACTERS[idx]
+    }
+    if (action === 'confirm') {
+      globalThis.gameState = 'levelselect'
+    }
 
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false
-})
-
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault()
-  if (tux.gameOver) {
-    globalThis.restartLevel()
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
+    }
+    update()
     return
   }
-  keys[' '] = true
-  setTimeout(() => {
-    keys[' '] = false
-  }, 100)
+  if (globalThis.gameState === 'levelselect') {
+    if (action === 'up') {
+      globalThis.level = (globalThis.level - 1 + LEVEL_COUNT) % LEVEL_COUNT
+    }
+    if (action === 'down') {
+      globalThis.level = (globalThis.level + 1) % LEVEL_COUNT
+    }
+    if (action === 'confirm') {
+      globalThis.gameState = 'playing'
+      loadLevel(globalThis.level)
+      saveProgress()
+    }
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
+    }
+    update()
+  }
+  if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
+    if (action === 'up' || action === 'down') {
+      globalThis.menuSelection = (globalThis.menuSelection === 'restart') ? 'menu' : 'restart'
+      update()
+      return
+    }
+    if (action === 'restart') {
+      if (globalThis.gameState === 'complete') {
+        globalThis.level = 0
+      }
+      globalThis.gameState = 'playing'
+      loadLevel(globalThis.level)
+      update()
+      return
+    }
+    if (action === 'confirm') {
+      handleAction(globalThis.menuSelection)
+      return
+    }
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
+    }
+    update()
+  }
+  if (action === 'menu') {
+    globalThis.gameState = 'start'
+    update()
+  }
+}
+document.addEventListener('keydown', (event) => {
+  keys[event.key] = true
+  if (event.key === 'ArrowUp') handleAction('up')
+  else if (event.key === 'ArrowDown') handleAction('down')
+  else if (event.key === 'Enter' || event.key === ' ') handleAction('confirm')
+  else if (event.key === '1') handleAction('restart')
+  else if (event.key === '2') handleAction('menu')
+  else if (event.key === 'Escape') handleAction('menu')
 })
 
-document.addEventListener('keydown', (e) => {
-  if (tux.gameOver) {
-    globalThis.restartLevel()
+document.addEventListener('keyup', (event) => {
+  keys[event.key] = false
+})
+
+/**
+ *
+ */
+function handlePointerMenuAction () {
+  if (globalThis.gameState === 'start') handleAction('confirm')
+  else if (globalThis.gameState === 'levelselect') handleAction('confirm')
+  else if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') handleAction('restart')
+  else {
+    keys[' '] = true
+    setTimeout(() => {
+      keys[' '] = false
+    }, 100)
+  }
+}
+
+canvas.addEventListener('touchstart', (event) => {
+  event.preventDefault()
+  handleCanvasClick(event)
+})
+
+canvas.addEventListener('mousedown', (event) => {
+  event.preventDefault()
+  handleCanvasClick(event)
+})
+canvas.addEventListener('mousemove', (event) => {
+  const { x, y } = getPointerPos(event)
+  for (const obj of clickableObjects) {
+    if (
+      x >= obj.x
+      && x <= obj.x + obj.width
+      && y >= obj.y
+      && y <= obj.y + obj.height
+    ) {
+      if ((obj.type === 'menu') && (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete')) {
+        if (globalThis.menuSelection !== obj.value) {
+          globalThis.menuSelection = obj.value
+          update()
+        }
+        return
+      }
+      if (obj.type === 'character' && globalThis.gameState === 'start') {
+        if (globalThis.character !== obj.value) {
+          globalThis.character = obj.value
+          update()
+        }
+      }
+      if (obj.type === 'level' && globalThis.gameState === 'levelselect') {
+        if (globalThis.level !== obj.value) {
+          globalThis.level = obj.value
+          update()
+        }
+      }
+      return
+    }
   }
 })
 
 window.addEventListener('resize', resizeCanvas)
-tuxImg.onload = () => {
-  loadLevel(globalThis.level)
+document.addEventListener('DOMContentLoaded', () => {
+  introMusic.play()
   update()
   resizeCanvas()
-}
+  handleAction()
+})

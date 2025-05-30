@@ -4,6 +4,9 @@ import { expect, test } from '@playwright/test'
 test('Tux can move and collect coins', async ({ page }) => {
   await page.goto('http://localhost:3001/')
 
+  await page.keyboard.press(' ')
+  await page.keyboard.press(' ')
+
   // Define jump points (in pixels)
   const jumpPoints = [
     32 * 5, // First gap 4+3 = 7

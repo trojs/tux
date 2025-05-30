@@ -49,7 +49,7 @@ export class Coin {
 
   /**
    * Check collision with Tux
-   * @param {import('./tux.js').Tux} tux
+   * @param {import('./character.js').Character} tux
    * @returns {boolean}
    */
   collidesWith (tux) {

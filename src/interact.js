@@ -1,5 +1,4 @@
 const walkFrameCount = 8
-const walkRow = 1
 const idleRow = 0
 const animSpeed = 5
 
@@ -8,10 +7,10 @@ const gameOverSound = typeof Audio !== 'undefined'
   : { play () {} }
 
 /**
- * @typedef {import('./objects/tux.js').Tux} Tux
- * @param {Tux} tux
+ * @typedef {import('./objects/character.js').Character} Character
+ * @param {Character} tux
  * @param {number} levelWidth
- * @returns {Tux}
+ * @returns {Character}
  */
 export function handleInput (tux, levelWidth) {
   const newTux = { ...tux }
@@ -22,9 +21,9 @@ export function handleInput (tux, levelWidth) {
 }
 
 /**
- * @param {Tux} tux
+ * @param {Character} tux
  * @param {number} canvasHeight
- * @returns {Tux}
+ * @returns {Character}
  */
 export function applyGravity (tux, canvasHeight) {
   const newTux = { ...tux }
@@ -42,9 +41,9 @@ export function applyGravity (tux, canvasHeight) {
 }
 
 /**
- * @param {Tux} tux
+ * @param {Character} tux
  * @param {{ [key: string]: boolean }} keys
- * @returns {Tux}
+ * @returns {Character}
  */
 export function jump (tux, keys) {
   const newTux = { ...tux }
@@ -55,15 +54,15 @@ export function jump (tux, keys) {
   return newTux
 }
 /**
- * @param {Tux} tux
- * @returns {Tux}
+ * @param {Character} tux
+ * @returns {Character}
  */
 export function updateTuxAnimation (tux) {
   const newTux = { ...tux }
   newTux.facing = 1
 
   if (newTux.onGround) {
-    newTux.animRow = walkRow
+    newTux.animRow = newTux.walkRow || 1 // Use per-character walk row
     newTux.animTimer = (newTux.animTimer || 0) + 1
     if (newTux.animTimer >= animSpeed) {
       newTux.animFrame = ((newTux.animFrame || 0) + 1) % walkFrameCount
