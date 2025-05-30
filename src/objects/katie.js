@@ -1,7 +1,7 @@
-const tuxImg = typeof Image !== 'undefined'
+const katieImg = typeof Image !== 'undefined'
   ? new Image()
   : {}
-tuxImg.src = 'sprites/katie.png'
+katieImg.src = 'sprites/katie.png'
 /** @type {import('./character.js').Character} */
 export const katie = {
   x: 400,
@@ -18,5 +18,5 @@ export const katie = {
   walkRow: 4,
   facing: 1,
   gameOver: false,
-  img: tuxImg
+  img: katieImg
 }
