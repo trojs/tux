@@ -323,7 +323,7 @@ function saveProgress () {
 
 /**
  * Handle all menu/game actions in one place.
- * @param {'up'|'down'|'confirm'|'restart'|'menu'} action
+ * @param {('up'|'down'|'confirm'|'restart'|'menu')=} action
  */
 function handleAction (action) {
   if (globalThis.gameState === 'start') {
@@ -419,5 +419,5 @@ document.addEventListener('DOMContentLoaded', () => {
   introMusic.play()
   update()
   resizeCanvas()
-  handleAction('start')
+  handleAction()
 })
