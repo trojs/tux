@@ -216,6 +216,11 @@ function drawMenu () {
       height: iconSize
     })
   })
+
+  ctx.font = 'bold 20px sans-serif'
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'right'
+  ctx.fillText(`Score: ${globalThis.score}`, canvas.width - 32, 32)
 }
 
 /**
