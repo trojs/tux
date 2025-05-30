@@ -415,6 +415,12 @@ function handleAction (action) {
     if (action === 'confirm') {
       globalThis.gameState = 'levelselect'
     }
+
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
+    }
     update()
     return
   }
@@ -429,6 +435,11 @@ function handleAction (action) {
       globalThis.gameState = 'playing'
       loadLevel(globalThis.level)
       saveProgress()
+    }
+    if (action === 'menu') {
+      globalThis.gameState = 'start'
+      update()
+      return
     }
     update()
   }
@@ -449,6 +460,10 @@ function handleAction (action) {
     }
     update()
   }
+  if (action === 'menu') {
+    globalThis.gameState = 'start'
+    update()
+  }
 }
 document.addEventListener('keydown', (event) => {
   keys[event.key] = true
@@ -457,6 +472,7 @@ document.addEventListener('keydown', (event) => {
   else if (event.key === 'Enter' || event.key === ' ') handleAction('confirm')
   else if (event.key === '1') handleAction('restart')
   else if (event.key === '2') handleAction('menu')
+  else if (event.key === 'Escape') handleAction('menu')
 })
 
 document.addEventListener('keyup', (event) => {
