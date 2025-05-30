@@ -10,6 +10,7 @@ const characters = {
   katie
 }
 /**
+ * @typedef {'tux' | 'tuxFire' | 'konqi' | 'katie'} CharacterName
  * @typedef {object} Character
  * @property {string} name - The name of the character.
  * @property {number} x - The x-coordinate of the character.
@@ -28,7 +29,8 @@ const characters = {
  * @property {boolean} gameOver - Whether the game is over.
  * @property {HTMLImageElement|object} sprite - The sprite image of the character.
  * @property {HTMLImageElement|object} img
- * @param {string} character
+ * @property {number} [price] - The price of the character, if applicable.
+ * @param {CharacterName} character
  * @returns {Character} - The character object.
  */
 const getCharacter = (character) => characters[character]

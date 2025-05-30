@@ -26,5 +26,6 @@ export const katie = {
   facing: 1,
   gameOver: false,
   sprite: katieSprite,
-  img: katieImg
+  img: katieImg,
+  price: 75
 }

@@ -26,5 +26,6 @@ export const konqi = {
   facing: 1,
   gameOver: false,
   sprite: konqiSprite,
-  img: konqiImg
+  img: konqiImg,
+  price: 50
 }

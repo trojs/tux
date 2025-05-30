@@ -26,5 +26,6 @@ export const tuxFire = {
   facing: 1,
   gameOver: false,
   sprite: tuxSprite,
-  img: tuxImg
+  img: tuxImg,
+  price: 25
 }

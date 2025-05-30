@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 /* eslint-disable complexity */
 /* eslint-disable max-depth */
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -28,6 +29,8 @@ globalThis.gameState = 'start'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 globalThis.character = localStorage.getItem('tux_character') || 'tux'
+let selectedCharacterName = globalThis.character
+const unlockedCharacters = JSON.parse(localStorage.getItem('tux_unlocked_characters') || '["tux"]')
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 globalThis.allLevelsCompleted = false
 let scale = 1
@@ -49,6 +52,8 @@ hudCoin.x = 32
 hudCoin.y = 8
 hudCoin.collected = false
 
+const menuCoin = new Coin(0, 0, 32, 32)
+
 Object.values(characters).forEach((charObj) => {
   if (charObj.img && !charObj.img.complete) {
     charObj.img.onload = () => {
@@ -56,6 +61,13 @@ Object.values(characters).forEach((charObj) => {
     }
   }
 })
+
+/**
+ *
+ */
+function saveUnlockedCharacters () {
+  localStorage.setItem('tux_unlocked_characters', JSON.stringify(unlockedCharacters))
+}
 
 /**
  * @param {object} levelData
@@ -149,15 +161,16 @@ function drawMenu () {
     const x = startX + col * (iconSize + spacingX)
     const y = startY + row * (iconSize + spacingY + 40)
 
-    ctx.font = globalThis.character === char ? 'bold 32px sans-serif' : '28px sans-serif'
-    ctx.fillStyle = globalThis.character === char ? '#ffd700' : '#fff'
+    const isUnlocked = unlockedCharacters.includes(char)
+    ctx.font = selectedCharacterName === char ? 'bold 32px sans-serif' : '28px sans-serif'
+    ctx.fillStyle = selectedCharacterName === char ? '#ffd700' : '#fff'
     ctx.fillText(
       char.charAt(0).toUpperCase() + char.slice(1),
       x + iconSize / 2,
       y + 30
     )
 
-    if (globalThis.character === char) {
+    if (selectedCharacterName === char) {
       ctx.save()
       ctx.strokeStyle = '#ffd700'
       ctx.lineWidth = 8
@@ -168,7 +181,31 @@ function drawMenu () {
     }
 
     const icon = characters[char].img
-    ctx.drawImage(icon, x, y + 40, iconSize, iconSize)
+    if (isUnlocked) {
+      ctx.drawImage(icon, x, y + 40, iconSize, iconSize)
+    } else {
+      ctx.save()
+      ctx.globalAlpha = 0.4
+      ctx.drawImage(icon, x, y + 40, iconSize, iconSize)
+      ctx.globalAlpha = 1
+
+      // Draw coin image under the character
+      menuCoin.x = x + iconSize / 2 - 16 // center under icon
+      menuCoin.y = y + 40 + iconSize + 10
+      menuCoin.collected = false
+      menuCoin.draw(ctx, 0, 0)
+
+      // Draw price next to the coin
+      ctx.font = 'bold 28px sans-serif'
+      ctx.fillStyle = '#ffd700'
+      ctx.textAlign = 'left'
+      ctx.fillText(
+        `${characters[char].price}`,
+        x + iconSize / 2 + 20,
+        y + iconSize + 40
+      )
+      ctx.restore()
+    }
 
     clickableObjects.push({
       type: 'character',
@@ -202,6 +239,37 @@ function getPointerPos (event) {
 }
 
 /**
+ * @param {Character} char
+ * @returns {void}
+ */
+function selectedCharacter (char) {
+  if (unlockedCharacters.includes(char)) {
+    console.log('select')
+    globalThis.character = char
+    selectedCharacterName = char
+    globalThis.gameState = 'levelselect'
+    update()
+  } else {
+    console.log('select 2')
+    const { price } = characters[char]
+    if (globalThis.score >= price) {
+      console.log('select 3')
+      globalThis.score -= price
+      unlockedCharacters.push(char)
+      saveUnlockedCharacters()
+      globalThis.character = char
+      selectedCharacterName = char
+      saveProgress()
+      update()
+      alert(`${char.charAt(0).toUpperCase() + char.slice(1)} gekocht!`)
+    } else {
+      console.log('select 4')
+      alert(`Niet genoeg munten voor ${char.charAt(0).toUpperCase() + char.slice(1)}!`)
+    }
+  }
+}
+
+/**
  * Handle clicks or touches on the canvas and trigger actions for clickable objects.
  * @param {MouseEvent | TouchEvent} event - The pointer event.
  * @returns {void}
@@ -216,8 +284,8 @@ function handleCanvasClick (event) {
       && y <= obj.y + obj.height
     ) {
       if (obj.type === 'character') {
-        globalThis.character = obj.value
-        handleAction('confirm')
+        selectedCharacter(selectedCharacterName)
+        return
       }
       if (obj.type === 'level') {
         globalThis.level = obj.value
@@ -434,6 +502,7 @@ function saveProgress () {
   localStorage.setItem('tux_score', globalThis.score)
   localStorage.setItem('tux_character', globalThis.character)
   localStorage.setItem('tux_game_state', globalThis.gameState)
+  saveUnlockedCharacters()
 }
 
 /**
@@ -443,19 +512,19 @@ function saveProgress () {
 function handleAction (action) {
   if (globalThis.gameState === 'start') {
     if (action === 'up') {
-      let idx = CHARACTERS.indexOf(globalThis.character)
+      let idx = CHARACTERS.indexOf(selectedCharacterName)
       idx = (idx - 1 + CHARACTERS.length) % CHARACTERS.length
-      globalThis.character = CHARACTERS[idx]
+      selectedCharacterName = CHARACTERS[idx]
     }
     if (action === 'down') {
-      let idx = CHARACTERS.indexOf(globalThis.character)
+      let idx = CHARACTERS.indexOf(selectedCharacterName)
       idx = (idx + 1) % CHARACTERS.length
-      globalThis.character = CHARACTERS[idx]
+      selectedCharacterName = CHARACTERS[idx]
     }
     if (action === 'confirm') {
-      globalThis.gameState = 'levelselect'
+      selectedCharacter(selectedCharacterName)
+      return
     }
-
     if (action === 'menu') {
       globalThis.gameState = 'start'
       update()
@@ -543,6 +612,22 @@ function handlePointerMenuAction () {
   }
 }
 
+/**
+ *
+ */
+function reset () {
+  localStorage.setItem('tux_level', 0)
+  localStorage.setItem('tux_score', 0)
+  localStorage.setItem('tux_character', 'tux')
+  localStorage.setItem('tux_game_state', 'start')
+  localStorage.setItem('tux_unlocked_characters', '["tux"]')
+  update()
+  resizeCanvas()
+  handleAction()
+}
+
+globalThis.resetGame = reset
+
 canvas.addEventListener('touchstart', (event) => {
   event.preventDefault()
   handleCanvasClick(event)
@@ -569,8 +654,8 @@ canvas.addEventListener('mousemove', (event) => {
         return
       }
       if (obj.type === 'character' && globalThis.gameState === 'start') {
-        if (globalThis.character !== obj.value) {
-          globalThis.character = obj.value
+        if (selectedCharacterName !== obj.value) {
+          selectedCharacterName = obj.value
           update()
         }
       }
