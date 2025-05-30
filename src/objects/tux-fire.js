@@ -1,7 +1,7 @@
 const tuxSprite = typeof Image !== 'undefined'
   ? new Image()
   : {}
-tuxSprite.src = 'sprites/tux.png'
+tuxSprite.src = 'sprites/tuxfirehat.png'
 
 const tuxImg = typeof Image !== 'undefined'
   ? new Image()
@@ -9,8 +9,8 @@ const tuxImg = typeof Image !== 'undefined'
 tuxImg.src = 'sprites/tux-pose.png'
 
 /** @type {import('./character.js').Character} */
-export const tux = {
-  name: 'Tux',
+export const tuxFire = {
+  name: 'Tux Fire',
   x: 400,
   y: 300,
   width: 32,

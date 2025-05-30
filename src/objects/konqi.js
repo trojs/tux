@@ -1,16 +1,16 @@
-const katieSprite = typeof Image !== 'undefined'
+const konqiSprite = typeof Image !== 'undefined'
   ? new Image()
   : {}
-katieSprite.src = 'sprites/katie.png'
+konqiSprite.src = 'sprites/konqi.png'
 
-const katieImg = typeof Image !== 'undefined'
+const konqiImg = typeof Image !== 'undefined'
   ? new Image()
   : {}
-katieImg.src = 'sprites/katie-pose.png'
+konqiImg.src = 'sprites/konqi-pose.png'
 
 /** @type {import('./character.js').Character} */
-export const katie = {
-  name: 'Katie',
+export const konqi = {
+  name: 'Konqi',
   x: 400,
   y: 300,
   width: 32,
@@ -25,6 +25,6 @@ export const katie = {
   walkRow: 4,
   facing: 1,
   gameOver: false,
-  sprite: katieSprite,
-  img: katieImg
+  sprite: konqiSprite,
+  img: konqiImg
 }

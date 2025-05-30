@@ -4,7 +4,10 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-statements */
-import getCharacter from './objects/character.js'
+import {
+  characters,
+  getCharacter
+} from './objects/character.js'
 import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
@@ -18,7 +21,7 @@ import { Coin } from './objects/coin.js'
  * @typedef {'start' | 'levelselect' | 'playing' | 'gameover' | 'complete'} GameState
  */
 
-const CHARACTERS = ['tux', 'katie'] // @todo: get characters from character.js
+const CHARACTERS = Object.keys(characters)
 const LEVEL_COUNT = 6 // @todo: get levels from levels.js
 /** @type {GameState} */
 globalThis.gameState = 'start'
@@ -45,6 +48,14 @@ const hudCoin = new Coin(0, 0, 32, 24)
 hudCoin.x = 32
 hudCoin.y = 8
 hudCoin.collected = false
+
+Object.values(characters).forEach((charObj) => {
+  if (charObj.img && !charObj.img.complete) {
+    charObj.img.onload = () => {
+      if (globalThis.gameState === 'start') update()
+    }
+  }
+})
 
 /**
  * @param {object} levelData
@@ -124,25 +135,48 @@ function drawMenu () {
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   ctx.fillText('Tux', canvas.width / 2, 100)
-  ctx.font = 'bold 32px sans-serif'
-  ctx.fillText('Kies je personage:', canvas.width / 2, 200)
+
+  const perRow = 4
+  const iconSize = 250
+  const spacingX = 60
+  const spacingY = 60
+  const startX = (canvas.width - (perRow * iconSize + (perRow - 1) * spacingX)) / 2
+  const startY = 220
+
   CHARACTERS.forEach((char, i) => {
-    const x = canvas.width / 2
-    const y = 270 + i * 60
-    ctx.font = globalThis.character === char ? 'bold 36px sans-serif' : '32px sans-serif'
+    const col = i % perRow
+    const row = Math.floor(i / perRow)
+    const x = startX + col * (iconSize + spacingX)
+    const y = startY + row * (iconSize + spacingY + 40)
+
+    ctx.font = globalThis.character === char ? 'bold 32px sans-serif' : '28px sans-serif'
     ctx.fillStyle = globalThis.character === char ? '#ffd700' : '#fff'
     ctx.fillText(
       char.charAt(0).toUpperCase() + char.slice(1),
-      x,
-      y
+      x + iconSize / 2,
+      y + 30
     )
+
+    if (globalThis.character === char) {
+      ctx.save()
+      ctx.strokeStyle = '#ffd700'
+      ctx.lineWidth = 8
+      ctx.shadowColor = '#ffd700'
+      ctx.shadowBlur = 20
+      ctx.strokeRect(x - 6, y + 34, iconSize + 12, iconSize + 12)
+      ctx.restore()
+    }
+
+    const icon = characters[char].img
+    ctx.drawImage(icon, x, y + 40, iconSize, iconSize)
+
     clickableObjects.push({
       type: 'character',
       value: char,
-      x: x - 100,
-      y: y - 30,
-      width: 200,
-      height: 40
+      x: x,
+      y: y + 40,
+      width: iconSize,
+      height: iconSize
     })
   })
 }
@@ -253,7 +287,7 @@ function draw (tux) {
     ctx.scale(-1, 1)
     ctx.translate(-tux.width / 2, -tux.height / 2)
     ctx.drawImage(
-      tux.img,
+      tux.sprite,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       0, 0,
@@ -261,7 +295,7 @@ function draw (tux) {
     )
   } else {
     ctx.drawImage(
-      tux.img,
+      tux.sprite,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       tux.x - cameraX, tux.y,
@@ -482,8 +516,8 @@ function handleAction (action) {
 }
 document.addEventListener('keydown', (event) => {
   keys[event.key] = true
-  if (event.key === 'ArrowUp') handleAction('up')
-  else if (event.key === 'ArrowDown') handleAction('down')
+  if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') handleAction('up')
+  else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') handleAction('down')
   else if (event.key === 'Enter' || event.key === ' ') handleAction('confirm')
   else if (event.key === '1') handleAction('restart')
   else if (event.key === '2') handleAction('menu')
