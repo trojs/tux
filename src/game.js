@@ -145,9 +145,6 @@ function drawMenu () {
       height: 40
     })
   })
-  ctx.font = '24px sans-serif'
-  ctx.fillStyle = '#aaa'
-  ctx.fillText('Gebruik pijltjestoetsen of klik om te kiezen, Enter/Spatie om te bevestigen', canvas.width / 2, canvas.height - 40)
 }
 
 /**
@@ -233,9 +230,6 @@ function drawLevelSelect () {
       height: 40
     })
   }
-  ctx.font = '24px sans-serif'
-  ctx.fillStyle = '#aaa'
-  ctx.fillText('Gebruik pijltjestoetsen of klik om te kiezen, Enter/Spatie om te bevestigen', canvas.width / 2, canvas.height - 40)
 }
 
 /**

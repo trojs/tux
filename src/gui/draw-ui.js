@@ -21,14 +21,6 @@ export function drawProgressBar (ctx, progress, canvas, scale) {
   ctx.strokeStyle = '#fff'
   ctx.lineWidth = 2
   ctx.strokeRect(barX, barY, barWidth, barHeight)
-  ctx.font = '14px sans-serif'
-  ctx.fillStyle = '#fff'
-  ctx.textAlign = 'center'
-  ctx.fillText(
-    `Level voortgang: ${(progress * 100).toFixed(0)}%`,
-    canvas.width / 2,
-    barY + barHeight - 3
-  )
   ctx.restore()
 }
 
@@ -83,8 +75,5 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
     width: 300,
     height: 40
   })
-  ctx.font = '24px sans-serif'
-  ctx.fillStyle = '#aaa'
-  ctx.fillText('Druk op 1 of 2, of gebruik pijltjestoetsen en Enter/Spatie', canvas.width / 2, canvas.height - 40)
   return clickableObjects
 }
