@@ -11,6 +11,7 @@ import { handleObstacleCollisions } from './collision.js'
 import { playMusic } from './music.js'
 import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
+import { Coin } from './objects/coin.js'
 
 /**
  * @typedef {import('./objects/character.js').Character} Character
@@ -39,6 +40,11 @@ const frameHeight = 32
 
 /** @type {{ [key: string]: boolean }} */
 const keys = {}
+
+const hudCoin = new Coin(0, 0, 32, 24)
+hudCoin.x = 32
+hudCoin.y = 8
+hudCoin.collected = false
 
 /**
  * @param {object} levelData
@@ -117,9 +123,9 @@ function drawMenu () {
   ctx.font = 'bold 48px sans-serif'
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
-  ctx.fillText('Tux Platformer', canvas.width / 2, 100)
+  ctx.fillText('Tux', canvas.width / 2, 100)
   ctx.font = 'bold 32px sans-serif'
-  ctx.fillText('Choose your character:', canvas.width / 2, 200)
+  ctx.fillText('Kies je personage:', canvas.width / 2, 200)
   CHARACTERS.forEach((char, i) => {
     const x = canvas.width / 2
     const y = 270 + i * 60
@@ -141,7 +147,7 @@ function drawMenu () {
   })
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
-  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+  ctx.fillText('Gebruik pijltjestoetsen of klik om te kiezen, Enter/Spatie om te bevestigen', canvas.width / 2, canvas.height - 40)
 }
 
 /**
@@ -210,7 +216,7 @@ function drawLevelSelect () {
   ctx.font = 'bold 36px sans-serif'
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
-  ctx.fillText('Choose Level', canvas.width / 2, 120)
+  ctx.fillText('Kies een level', canvas.width / 2, 120)
   for (let i = 0; i < LEVEL_COUNT; i++) {
     const x = canvas.width / 2
     const y = 200 + i * 50
@@ -229,7 +235,7 @@ function drawLevelSelect () {
   }
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
-  ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
+  ctx.fillText('Gebruik pijltjestoetsen of klik om te kiezen, Enter/Spatie om te bevestigen', canvas.width / 2, canvas.height - 40)
 }
 
 /**
@@ -283,10 +289,11 @@ function draw (tux) {
     const collected = coins.filter((c) => c.collected).length
     levelScore += collected
     const total = coins.length
+    hudCoin.draw(ctx, 0, 0)
     ctx.font = 'bold 20px sans-serif'
     ctx.fillStyle = '#ffd700'
     ctx.textAlign = 'left'
-    ctx.fillText(`Coins: ${collected} / ${total}`, 32, 32)
+    ctx.fillText(`${collected} / ${total}`, 64, 28)
   }
   ctx.font = 'bold 20px sans-serif'
   ctx.fillStyle = '#fff'

@@ -25,7 +25,7 @@ export function drawProgressBar (ctx, progress, canvas, scale) {
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   ctx.fillText(
-    `Level Progress: ${(progress * 100).toFixed(0)}%`,
+    `Level voortgang: ${(progress * 100).toFixed(0)}%`,
     canvas.width / 2,
     barY + barHeight - 3
   )
@@ -51,9 +51,9 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   if (allLevelsCompleted) {
-    ctx.fillText('Congratulations!', canvas.width / 2, canvas.height / 2 - 20)
+    ctx.fillText('Gefeliciteerd!', canvas.width / 2, canvas.height / 2 - 20)
     ctx.font = '32px sans-serif'
-    ctx.fillText('You completed all levels!', canvas.width / 2, canvas.height / 2 + 30)
+    ctx.fillText('Je hebt alle levels gehaald!', canvas.width / 2, canvas.height / 2 + 30)
     music.pause()
     completeMusic.play()
   } else {
@@ -63,7 +63,7 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   ctx.font = 'bold 28px sans-serif'
   ctx.fillStyle = globalThis.menuSelection === 'restart' ? '#ffd700' : '#fff'
 
-  ctx.fillText('1: Restart Level', canvas.width / 2, 300)
+  ctx.fillText('1: Herstart level', canvas.width / 2, 300)
   clickableObjects.push({
     type: 'menu',
     value: 'restart',
@@ -74,7 +74,7 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   })
 
   ctx.fillStyle = globalThis.menuSelection === 'menu' ? '#ffd700' : '#fff'
-  ctx.fillText('2: Choose Character', canvas.width / 2, 360)
+  ctx.fillText('2: Kies personage', canvas.width / 2, 360)
   clickableObjects.push({
     type: 'menu',
     value: 'menu',
@@ -85,6 +85,6 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
   })
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
-  ctx.fillText('Press 1 or 2, or use Arrow keys and Enter/Space', canvas.width / 2, canvas.height - 40)
+  ctx.fillText('Druk op 1 of 2, of gebruik pijltjestoetsen en Enter/Spatie', canvas.width / 2, canvas.height - 40)
   return clickableObjects
 }
