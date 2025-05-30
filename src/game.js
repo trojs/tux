@@ -249,16 +249,13 @@ function getPointerPos (event) {
  */
 function selectedCharacter (char) {
   if (unlockedCharacters.includes(char)) {
-    console.log('select')
     globalThis.character = char
     selectedCharacterName = char
     globalThis.gameState = 'levelselect'
     update()
   } else {
-    console.log('select 2')
     const { price } = characters[char]
     if (globalThis.score >= price) {
-      console.log('select 3')
       globalThis.score -= price
       unlockedCharacters.push(char)
       saveUnlockedCharacters()
@@ -268,7 +265,6 @@ function selectedCharacter (char) {
       update()
       alert(`${char.charAt(0).toUpperCase() + char.slice(1)} gekocht!`)
     } else {
-      console.log('select 4')
       alert(`Niet genoeg munten voor ${char.charAt(0).toUpperCase() + char.slice(1)}!`)
     }
   }
