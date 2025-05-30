@@ -18,7 +18,7 @@ import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 const CHARACTERS = ['tux', 'katie'] // @todo: get characters from character.js
 const LEVEL_COUNT = 6 // @todo: get levels from levels.js
 /** @type {GameState} */
-globalThis.gameState = localStorage.getItem('tux_game_state') || 'start'
+globalThis.gameState = 'start'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 globalThis.character = localStorage.getItem('tux_character') || 'tux'
@@ -27,7 +27,10 @@ globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
 
+const introMusic = new Audio('./music/intro.ogg')
+introMusic.loop = true
 const completeMusic = new Audio('./music/credits.ogg')
+completeMusic.loop = true
 const frameWidth = 32
 const frameHeight = 32
 
@@ -62,6 +65,7 @@ function resizeCanvas () {
 function loadLevel (newLevel) {
   const tux = getCharacter(globalThis.character)
   resetCoins()
+  introMusic.pause()
   completeMusic.pause()
   if (globalThis.allLevelsCompleted) {
     globalThis.level = 0
@@ -142,35 +146,6 @@ function drawLevelSelect () {
   ctx.font = '24px sans-serif'
   ctx.fillStyle = '#aaa'
   ctx.fillText('Use Arrow keys or click to select, Enter/Space to confirm', canvas.width / 2, canvas.height - 40)
-}
-
-/**
- *
- * @param {boolean} allLevelsCompleted
- * @returns {void}
- */
-function drawGameOverMenu (allLevelsCompleted) {
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  ctx.fillStyle = 'rgba(0,0,0,0.7)'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.font = 'bold 48px sans-serif'
-  ctx.fillStyle = '#fff'
-  ctx.textAlign = 'center'
-  if (allLevelsCompleted) {
-    ctx.fillText('Congratulations!', canvas.width / 2, 120)
-    ctx.font = '32px sans-serif'
-    ctx.fillText('You completed all levels!', canvas.width / 2, 180)
-  } else {
-    ctx.fillText('Game Over!', canvas.width / 2, 150)
-  }
-  ctx.font = 'bold 28px sans-serif'
-  ctx.fillStyle = '#ffd700'
-  ctx.fillText('1: Restart Level', canvas.width / 2, 300)
-  ctx.fillText('2: Choose Character', canvas.width / 2, 360)
-  ctx.font = '24px sans-serif'
-  ctx.fillStyle = '#aaa'
-  ctx.fillText('Press 1 or 2, or use Arrow keys and Enter/Space', canvas.width / 2, canvas.height - 40)
 }
 
 /**
@@ -279,6 +254,9 @@ globalThis.restartLevel = () => {
  */
 function update () {
   const tux = getCharacter(globalThis.character)
+  if (tux.gameOver && globalThis.gameState === 'playing') {
+    globalThis.gameState = 'gameover'
+  }
   if (globalThis.gameState === 'start') {
     drawMenu()
     return
@@ -288,7 +266,7 @@ function update () {
     return
   }
   if (globalThis.gameState === 'gameover' || globalThis.gameState === 'complete') {
-    drawGameOverMenu(globalThis.gameState === 'complete')
+    showGameOver(ctx, canvas, globalThis.gameState === 'complete', music, completeMusic)
     return
   }
   if (!tux.gameOver) {
@@ -389,7 +367,7 @@ function handleAction (action) {
       update()
       return
     }
-    if (action === 'menu') {
+    if (action === 'menu' || action === 'confirm') {
       globalThis.gameState = 'start'
       update()
       return
@@ -438,7 +416,8 @@ canvas.addEventListener('mousedown', (event) => {
 
 window.addEventListener('resize', resizeCanvas)
 document.addEventListener('DOMContentLoaded', () => {
-  loadLevel(globalThis.level)
+  introMusic.play()
   update()
   resizeCanvas()
+  handleAction('start')
 })

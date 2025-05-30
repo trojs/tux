@@ -40,10 +40,12 @@ export function drawProgressBar (ctx, progress, canvas, scale) {
  * @param {HTMLAudioElement} completeMusic
  */
 export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMusic) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = 'rgba(0,0,0,0.7)'
-  ctx.fillRect(0, canvas.height / 2 - 100, canvas.width, 300)
-  ctx.fillStyle = 'white'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.font = 'bold 48px sans-serif'
+  ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   if (allLevelsCompleted) {
     ctx.fillText('Congratulations!', canvas.width / 2, canvas.height / 2 - 20)
@@ -53,6 +55,12 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
     completeMusic.play()
   } else {
     ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20)
-    ctx.font = '24px sans-serif'
   }
+  ctx.font = 'bold 28px sans-serif'
+  ctx.fillStyle = '#ffd700'
+  ctx.fillText('1: Restart Level', canvas.width / 2, 300)
+  ctx.fillText('2: Choose Character', canvas.width / 2, 360)
+  ctx.font = '24px sans-serif'
+  ctx.fillStyle = '#aaa'
+  ctx.fillText('Press 1 or 2, or use Arrow keys and Enter/Space', canvas.width / 2, canvas.height - 40)
 }
