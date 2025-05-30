@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-statements */
-import { tux, tuxImg } from './objects/tux.js'
+import getCharacter from './objects/character.js'
 import { getLevel } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
@@ -9,12 +9,17 @@ import { playMusic } from './music.js'
 import { canvas, ctx } from './gui.js'
 import { drawProgressBar, showGameOver } from './gui/draw-ui.js'
 
+/**
+ * @typedef {import('./objects/tux.js').Tux} Tux
+ */
+
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
 globalThis.score = Number(localStorage.getItem('tux_score')) || 0
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
 globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
+const character = 'tux'
 
 const completeMusic = new Audio('./music/credits.ogg')
 const frameWidth = 32
@@ -49,6 +54,7 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
+  const tux = getCharacter(character)
   resetCoins()
   completeMusic.pause()
   if (globalThis.allLevelsCompleted) {
@@ -74,16 +80,19 @@ function loadLevel (newLevel) {
   tux.y = 300
   tux.vy = 0
   tux.gameOver = false
-  playMusic(music)
-  music.play()
+  if (music) {
+    playMusic(music)
+    music.play()
+  }
   updateScale(levelData)
   return newLevel
 }
 
 /**
- *
+ * @param {Tux} tux
+ * @returns {void}
  */
-function draw () {
+function draw (tux) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0)
   ctx.clearRect(0, 0, canvas.width / scale, canvas.height / scale)
 
@@ -101,7 +110,7 @@ function draw () {
     ctx.scale(-1, 1)
     ctx.translate(-tux.width / 2, -tux.height / 2)
     ctx.drawImage(
-      tuxImg,
+      tux.img,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       0, 0,
@@ -109,7 +118,7 @@ function draw () {
     )
   } else {
     ctx.drawImage(
-      tuxImg,
+      tux.img,
       tux.animFrame * frameWidth, tux.animRow * frameHeight,
       frameWidth, frameHeight,
       tux.x - cameraX, tux.y,
@@ -152,8 +161,10 @@ function draw () {
 
 /**
  *
+ * @param {Tux} tux
+ * returns {void}
  */
-function updateCamera () {
+function updateCamera (tux) {
   cameraX = tux.x + tux.width / 2 - canvas.width / 2
 
   if (cameraX < 0) cameraX = 0
@@ -180,9 +191,13 @@ globalThis.restartLevel = () => {
  *
  */
 function update () {
+  const tux = getCharacter(character)
   if (!tux.gameOver) {
     tux.x += tux.speed
+  } else if (keys['ArrowUp'] || keys[' '] || keys['Space']) {
+    globalThis.restartLevel()
   }
+
   Object.assign(tux, handleInput(tux, levelWidth))
   Object.assign(tux, jump(tux, keys))
   Object.assign(tux, applyGravity(tux, levelHeight))
@@ -209,8 +224,9 @@ function update () {
     }
     saveProgress()
   }
-  updateCamera()
-  draw()
+
+  updateCamera(tux)
+  draw(tux)
   globalThis.tux = tux
   requestAnimationFrame(update)
 }
@@ -223,35 +239,33 @@ function saveProgress () {
   localStorage.setItem('tux_score', globalThis.score)
 }
 
-document.addEventListener('keydown', (e) => {
-  keys[e.key] = true
+document.addEventListener('keydown', (event) => {
+  keys[event.key] = true
 })
 
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false
+document.addEventListener('keyup', (event) => {
+  keys[event.key] = false
 })
 
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault()
-  if (tux.gameOver) {
-    globalThis.restartLevel()
-    return
-  }
+canvas.addEventListener('touchstart', (event) => {
+  event.preventDefault()
   keys[' '] = true
   setTimeout(() => {
     keys[' '] = false
   }, 100)
 })
 
-document.addEventListener('keydown', (e) => {
-  if (tux.gameOver) {
-    globalThis.restartLevel()
-  }
+canvas.addEventListener('mousedown', (event) => {
+  event.preventDefault()
+  keys[' '] = true
+  setTimeout(() => {
+    keys[' '] = false
+  }, 100)
 })
 
 window.addEventListener('resize', resizeCanvas)
-tuxImg.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
   loadLevel(globalThis.level)
   update()
   resizeCanvas()
-}
+})

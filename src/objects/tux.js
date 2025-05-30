@@ -1,3 +1,7 @@
+const tuxImg = typeof Image !== 'undefined'
+  ? new Image()
+  : {}
+tuxImg.src = 'sprites/tux.png'
 /**
  * @typedef {object} Tux
  * @property {number} x - The x-coordinate of Tux.
@@ -15,7 +19,7 @@
  * @property {boolean} gameOver - Whether the game is over.
  * @returns {Tux} - The Tux object.
  */
-const tux = {
+export const tux = {
   x: 400,
   y: 300,
   width: 32,
@@ -28,15 +32,6 @@ const tux = {
   animTimer: 0,
   animRow: 1,
   facing: 1,
-  gameOver: false
-}
-
-const tuxImg = typeof Image !== 'undefined'
-  ? new Image()
-  : {}
-tuxImg.src = 'sprites/tux.png'
-
-export {
-  tux,
-  tuxImg
+  gameOver: false,
+  img: tuxImg
 }
