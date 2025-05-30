@@ -66,6 +66,7 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
+  clickableObjects = []
   const tux = getCharacter(globalThis.character)
   resetCoins()
   introMusic.pause()
