@@ -222,14 +222,10 @@ function drawMenu () {
     })
   })
 
-  hudCoin.x = canvas.width - 120
-  hudCoin.y = 32
-  hudCoin.collected = false
-  hudCoin.draw(ctx, 0, 0)
   ctx.font = 'bold 20px sans-serif'
-  ctx.fillStyle = '#ffd700'
-  ctx.textAlign = 'left'
-  ctx.fillText(`${globalThis.score}`, canvas.width - 80, 52)
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'right'
+  ctx.fillText(`Score: ${globalThis.score}`, canvas.width - 32, 32)
 }
 
 /**
