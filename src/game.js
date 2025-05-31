@@ -90,7 +90,7 @@ function resizeCanvas () {
   canvas.style.width = `${width}px`
   canvas.style.height = `${height}px`
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.scale(dpr, dpr)
 }
 
