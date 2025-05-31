@@ -9,7 +9,7 @@ import {
   characters,
   getCharacter
 } from './objects/character.js'
-import { getLevel } from './levels/levels.js'
+import { getLevel, levels } from './levels/levels.js'
 import { applyGravity, handleInput, jump, updateTuxAnimation } from './interact.js'
 import { handleObstacleCollisions } from './collision.js'
 import { playMusic } from './music.js'
@@ -23,7 +23,7 @@ import { Coin } from './objects/coin.js'
  */
 
 const CHARACTERS = Object.keys(characters)
-const LEVEL_COUNT = 6 // @todo: get levels from levels.js
+const LEVEL_COUNT = levels.length
 /** @type {GameState} */
 globalThis.gameState = 'start'
 globalThis.level = Number(localStorage.getItem('tux_level')) || 0
@@ -148,12 +148,19 @@ function drawMenu () {
   ctx.textAlign = 'center'
   ctx.fillText('Tux', canvas.width / 2, 100)
 
-  const perRow = 4
-  const iconSize = 250
-  const spacingX = 60
-  const spacingY = 60
+  let perRow = 4
+  let iconSize = 250
+  let spacingX = 60
+  let spacingY = 60
+  if (window.innerWidth < 700 || window.innerHeight > window.innerWidth) {
+    perRow = 2
+    iconSize = Math.min(180, canvas.width / 2 - 40)
+    spacingX = 24
+    spacingY = 32
+  }
+
   const startX = (canvas.width - (perRow * iconSize + (perRow - 1) * spacingX)) / 2
-  const startY = 220
+  const startY = 180
 
   CHARACTERS.forEach((char, i) => {
     const col = i % perRow
@@ -162,7 +169,7 @@ function drawMenu () {
     const y = startY + row * (iconSize + spacingY + 40)
 
     const isUnlocked = unlockedCharacters.includes(char)
-    ctx.font = selectedCharacterName === char ? 'bold 32px sans-serif' : '28px sans-serif'
+    ctx.font = selectedCharacterName === char ? 'bold 28px sans-serif' : '24px sans-serif'
     ctx.fillStyle = selectedCharacterName === char ? '#ffd700' : '#fff'
     ctx.fillText(
       char.charAt(0).toUpperCase() + char.slice(1),
@@ -173,10 +180,10 @@ function drawMenu () {
     if (selectedCharacterName === char) {
       ctx.save()
       ctx.strokeStyle = '#ffd700'
-      ctx.lineWidth = 8
+      ctx.lineWidth = 6
       ctx.shadowColor = '#ffd700'
-      ctx.shadowBlur = 20
-      ctx.strokeRect(x - 6, y + 34, iconSize + 12, iconSize + 12)
+      ctx.shadowBlur = 16
+      ctx.strokeRect(x - 4, y + 34, iconSize + 8, iconSize + 8)
       ctx.restore()
     }
 
@@ -189,20 +196,18 @@ function drawMenu () {
       ctx.drawImage(icon, x, y + 40, iconSize, iconSize)
       ctx.globalAlpha = 1
 
-      // Draw coin image under the character
-      menuCoin.x = x + iconSize / 2 - 16 // center under icon
-      menuCoin.y = y + 40 + iconSize + 10
+      menuCoin.x = x + iconSize / 2 - 16
+      menuCoin.y = y + 40 + iconSize + 6
       menuCoin.collected = false
       menuCoin.draw(ctx, 0, 0)
 
-      // Draw price next to the coin
-      ctx.font = 'bold 28px sans-serif'
+      ctx.font = 'bold 22px sans-serif'
       ctx.fillStyle = '#ffd700'
       ctx.textAlign = 'left'
       ctx.fillText(
         `${characters[char].price}`,
         x + iconSize / 2 + 20,
-        y + iconSize + 40
+        y + iconSize + 32
       )
       ctx.restore()
     }
@@ -285,7 +290,7 @@ function handleCanvasClick (event) {
       && y <= obj.y + obj.height
     ) {
       if (obj.type === 'character') {
-        selectedCharacter(selectedCharacterName)
+        selectedCharacter(obj.value)
         return
       }
       if (obj.type === 'level') {
