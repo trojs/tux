@@ -82,10 +82,12 @@ function updateScale (levelData) {
  */
 function resizeCanvas () {
   const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
-  canvas.width = (window.innerWidth / scale) * dpr
-  canvas.height = (window.innerHeight / scale) * dpr
-  canvas.style.width = `${window.innerWidth}px`
-  canvas.style.height = `${window.innerHeight}px`
+  const maxW = window.innerWidth < 700 ? 480 : window.innerWidth
+  const maxH = window.innerWidth < 700 ? 800 : window.innerHeight
+  canvas.width = (maxW / scale) * dpr
+  canvas.height = (maxH / scale) * dpr
+  canvas.style.width = `${maxW}px`
+  canvas.style.height = `${maxH}px`
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.scale((1 / scale) * dpr, (1 / scale) * dpr)
 }
@@ -172,7 +174,7 @@ function drawMenu () {
     ctx.font = selectedCharacterName === char ? 'bold 28px sans-serif' : '24px sans-serif'
     ctx.fillStyle = selectedCharacterName === char ? '#ffd700' : '#fff'
     ctx.fillText(
-      char.charAt(0).toUpperCase() + char.slice(1),
+      characters[char].name,
       x + iconSize / 2,
       y + 30
     )
@@ -268,9 +270,9 @@ function selectedCharacter (char) {
       selectedCharacterName = char
       saveProgress()
       update()
-      alert(`${char.charAt(0).toUpperCase() + char.slice(1)} gekocht!`)
+      alert(`${characters[char].name} gekocht!`)
     } else {
-      alert(`Niet genoeg munten voor ${char.charAt(0).toUpperCase() + char.slice(1)}!`)
+      alert(`Niet genoeg munten voor ${characters[char].name}!`)
     }
   }
 }
@@ -644,6 +646,7 @@ canvas.addEventListener('mousedown', (event) => {
   handleCanvasClick(event)
 })
 canvas.addEventListener('mousemove', (event) => {
+  if (window.innerWidth < 700) return
   const { x, y } = getPointerPos(event)
   for (const obj of clickableObjects) {
     if (
