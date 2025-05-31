@@ -81,15 +81,17 @@ function updateScale (levelData) {
  *
  */
 function resizeCanvas () {
-  const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
-  const maxW = window.innerWidth < 700 ? 480 : window.innerWidth
-  const maxH = window.innerWidth < 700 ? 800 : window.innerHeight
-  canvas.width = (maxW / scale) * dpr
-  canvas.height = (maxH / scale) * dpr
-  canvas.style.width = `${maxW}px`
-  canvas.style.height = `${maxH}px`
+  const dpr = window.devicePixelRatio || 1
+  const width = window.innerWidth
+  const height = window.innerHeight
+
+  canvas.width = width * dpr
+  canvas.height = height * dpr
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
+
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  ctx.scale((1 / scale) * dpr, (1 / scale) * dpr)
+  ctx.scale(dpr, dpr)
 }
 
 /**
