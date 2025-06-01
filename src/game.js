@@ -80,10 +80,27 @@ function updateScale (levelData) {
 /**
  *
  */
+function resizeCanvasMenu () {
+  const dpr = window.devicePixelRatio || 1
+  const width = window.innerWidth
+  const height = window.innerHeight
+
+  canvas.width = width * dpr
+  canvas.height = height * dpr
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.scale(dpr, dpr)
+}
+
+/**
+ *
+ */
 function resizeCanvas () {
   const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
-  const maxW = window.innerWidth < 700 ? 480 : window.innerWidth
-  const maxH = window.innerWidth < 700 ? 800 : window.innerHeight
+  const maxW = window.innerWidth
+  const maxH = window.innerHeight
   canvas.width = (maxW / scale) * dpr
   canvas.height = (maxH / scale) * dpr
   canvas.style.width = `${maxW}px`
@@ -97,6 +114,7 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
+  resizeCanvas()
   clickableObjects = []
   const tux = getCharacter(globalThis.character)
   resetCoins()
@@ -137,6 +155,7 @@ function loadLevel (newLevel) {
  * @returns {void}
  */
 function drawMenu () {
+  resizeCanvasMenu()
   if (music) music.pause()
   completeMusic.pause()
   introMusic.play()
@@ -312,6 +331,7 @@ function handleCanvasClick (event) {
  *
  */
 function drawLevelSelect () {
+  resizeCanvasMenu()
   if (music) music.pause()
   completeMusic.pause()
   introMusic.play()
