@@ -99,8 +99,8 @@ function resizeCanvasMenu () {
  */
 function resizeCanvas () {
   const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
-  const maxW = window.innerWidth < 700 ? 480 : window.innerWidth
-  const maxH = window.innerWidth < 700 ? 800 : window.innerHeight
+  const maxW = window.innerWidth
+  const maxH = window.innerHeight
   canvas.width = (maxW / scale) * dpr
   canvas.height = (maxH / scale) * dpr
   canvas.style.width = `${maxW}px`
