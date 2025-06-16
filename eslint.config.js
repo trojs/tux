@@ -8,8 +8,9 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.node,
-        ...globals.es2024,
-        ...globals.browser
+        ...globals.es2025,
+        ...globals.browser,
+        localStorage: 'readonly'
       }
     },
     settings: {
