@@ -24,7 +24,7 @@
     "devDependencies": {
         "@playwright/test": "^1.52.0",
         "@trojs/lint": "^0.4.0",
-        "eslint": "^9.15.0",
+        "eslint": "^10.0.0",
         "globals": "^17.0.0",
         "monocart-reporter": "^2.9.19",
         "playwright": "^1.52.0",
