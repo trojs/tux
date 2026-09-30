@@ -23,12 +23,19 @@
     "module": "src/index.js",
     "devDependencies": {
         "@playwright/test": "^1.52.0",
+        "@eslint/js": "^10.0.1",
         "@trojs/lint": "^0.4.0",
-        "eslint": "^9.15.0",
+        "eslint": "^10.11.0",
         "globals": "^17.0.0",
         "monocart-reporter": "^2.9.19",
         "playwright": "^1.52.0",
         "serve": "^14.2.4"
+    },
+    "overrides": {
+        "@trojs/lint": {
+            "eslint": "^10.11.0",
+            "eslint-plugin-sonarjs": "^4.2.2"
+        }
     },
     "repository": {
         "type": "git",
