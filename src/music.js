@@ -6,13 +6,9 @@ let started = false
  * @returns {void}
  */
 export function playMusic (music) {
-  if (!started && music instanceof HTMLAudioElement) {
+  if (!started && typeof HTMLAudioElement !== 'undefined' && music instanceof HTMLAudioElement) {
     music.volume = 0.5
-    music.play()
+    void Promise.resolve(music.play()).catch(() => {})
     started = true
   }
 }
-
-// Listen for the first user interaction to start music
-window.addEventListener('keydown', playMusic, { once: true })
-window.addEventListener('mousedown', playMusic, { once: true })

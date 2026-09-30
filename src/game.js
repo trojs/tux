@@ -32,7 +32,6 @@ globalThis.character = localStorage.getItem('tux_character') || 'tux'
 let selectedCharacterName = globalThis.character
 const unlockedCharacters = JSON.parse(localStorage.getItem('tux_unlocked_characters') || '["tux"]')
 let obstacles, coins, levelWidth, levelHeight, music, backgroundColor
-globalThis.allLevelsCompleted = false
 let scale = 1
 let cameraX = 0
 let clickableObjects = []
@@ -98,15 +97,14 @@ function resizeCanvasMenu () {
  *
  */
 function resizeCanvas () {
-  const dpr = window.devicePixelRatio > 1 ? window.devicePixelRatio / 2 : 1
   const maxW = window.innerWidth
   const maxH = window.innerHeight
-  canvas.width = (maxW / scale) * dpr
-  canvas.height = (maxH / scale) * dpr
+  canvas.width = maxW / scale
+  canvas.height = maxH / scale
   canvas.style.width = `${maxW}px`
   canvas.style.height = `${maxH}px`
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  ctx.scale((1 / scale) * dpr, (1 / scale) * dpr)
+  ctx.scale(scale, scale)
 }
 
 /**
@@ -114,22 +112,15 @@ function resizeCanvas () {
  * @returns {number}
  */
 function loadLevel (newLevel) {
-  resizeCanvas()
   clickableObjects = []
   const tux = getCharacter(globalThis.character)
-  resetCoins()
   introMusic.pause()
   completeMusic.pause()
-  if (globalThis.allLevelsCompleted) {
-    globalThis.level = 0
-    tux.gameOver = false
-    globalThis.allLevelsCompleted = false
-    return loadLevel(0)
-  }
   const levelData = getLevel(newLevel)
   if (!levelData) return 0
   obstacles = levelData.obstacles
   coins = levelData.coins || []
+  resetCoins()
   levelWidth = levelData.levelWidth || canvas.width
   levelHeight = Math.max(levelData.levelHeight, canvas.height)
 
@@ -145,9 +136,10 @@ function loadLevel (newLevel) {
   tux.gameOver = false
   if (music) {
     playMusic(music)
-    music.play()
+    void Promise.resolve(music.play()).catch(() => {})
   }
   updateScale(levelData)
+  resizeCanvas()
   return newLevel
 }
 
@@ -158,7 +150,7 @@ function drawMenu () {
   resizeCanvasMenu()
   if (music) music.pause()
   completeMusic.pause()
-  introMusic.play()
+  void Promise.resolve(introMusic.play()).catch(() => {})
   clickableObjects = []
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -334,7 +326,7 @@ function drawLevelSelect () {
   resizeCanvasMenu()
   if (music) music.pause()
   completeMusic.pause()
-  introMusic.play()
+  void Promise.resolve(introMusic.play()).catch(() => {})
   clickableObjects = []
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -397,8 +389,8 @@ function draw (tux) {
       tux.x - cameraX, tux.y,
       tux.width, tux.height
     )
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
+  ctx.restore()
 
   ctx.font = 'bold 20px sans-serif'
   ctx.fillStyle = '#fff'
@@ -425,10 +417,10 @@ function draw (tux) {
   ctx.fillText(`Score: ${levelScore}`, canvas.width - 32, 32)
 
   const progress = Math.max(0, Math.min(1, tux.x / (levelWidth - tux.width)))
-  drawProgressBar(ctx, progress, canvas, scale)
+  drawProgressBar(ctx, progress, canvas)
 
   if (tux.gameOver) {
-    clickableObjects = showGameOver(ctx, canvas, globalThis.allLevelsCompleted, music, completeMusic)
+    clickableObjects = showGameOver(ctx, canvas, globalThis.gameState === 'complete', music, completeMusic)
   }
 }
 
@@ -511,7 +503,7 @@ function update () {
       globalThis.gameState = 'complete'
       if (music) music.pause()
       completeMusic.currentTime = 0
-      completeMusic.play()
+      void Promise.resolve(completeMusic.play()).catch(() => {})
     }
     saveProgress()
   }
@@ -701,7 +693,7 @@ canvas.addEventListener('mousemove', (event) => {
 
 window.addEventListener('resize', resizeCanvas)
 document.addEventListener('DOMContentLoaded', () => {
-  introMusic.play()
+  void Promise.resolve(introMusic.play()).catch(() => {})
   update()
   resizeCanvas()
   handleAction()

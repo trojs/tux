@@ -5,9 +5,8 @@
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} progress
  * @param {HTMLCanvasElement} canvas
- * @param {number} scale
  */
-export function drawProgressBar (ctx, progress, canvas, scale) {
+export function drawProgressBar (ctx, progress, canvas) {
   const barWidth = canvas.width * 0.6
   const barHeight = 16
   const barX = (canvas.width - barWidth) / 2
@@ -47,7 +46,7 @@ export function showGameOver (ctx, canvas, allLevelsCompleted, music, completeMu
     ctx.font = '32px sans-serif'
     ctx.fillText('Je hebt alle levels gehaald!', canvas.width / 2, canvas.height / 2 + 30)
     music.pause()
-    completeMusic.play()
+    void Promise.resolve(completeMusic.play()).catch(() => {})
   } else {
     ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20)
   }

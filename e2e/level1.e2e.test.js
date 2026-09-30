@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test'
 
 test('Tux can move and collect coins', async ({ page }) => {
-  await page.goto('http://localhost:3001/')
+  await page.goto('/')
 
   await page.keyboard.press(' ')
   await page.keyboard.press(' ')
