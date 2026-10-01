@@ -35,7 +35,7 @@ export function applyGravity (tux, canvasHeight) {
 
   if (newTux.y + newTux.height > canvasHeight * 2) {
     newTux.gameOver = true
-    gameOverSound.play()
+    void Promise.resolve(gameOverSound.play()).catch(() => {})
   }
   return newTux
 }

@@ -1,6 +1,13 @@
 import globals from 'globals'
 import { plugins, rules } from '@trojs/lint'
 
+const compatibleRules = Object.fromEntries(
+  Object.entries(rules.all).filter(([ruleName]) => {
+    if (!ruleName.startsWith('sonarjs/')) return true
+    return Object.hasOwn(plugins.sonarjs.rules, ruleName.slice('sonarjs/'.length))
+  })
+)
+
 export default [
   {
     languageOptions: {
@@ -22,7 +29,7 @@ export default [
       ...plugins
     },
     rules: {
-      ...rules.all
+      ...compatibleRules
     },
     files: ['**/*.js']
   }
