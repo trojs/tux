@@ -19,6 +19,11 @@ export default defineConfig({
     trace: 'on',
     screenshot: 'only-on-failure'
   },
+  webServer: {
+    command: 'npm run serve',
+    url: 'http://localhost:3001',
+    reuseExistingServer: true
+  },
   retries: 3,
   maxFailures: 5,
   expect: {
